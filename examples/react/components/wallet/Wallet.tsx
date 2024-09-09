@@ -7,8 +7,8 @@ import {
 } from "@interchain-ui/react";
 import { WalletStatus } from "@cosmos-kit/core";
 import { useChain } from "@cosmos-kit/react";
-import { chains } from "../../config/chains";
-import { defaultChainName } from "../../config/defaults";
+import { chains } from "@/config";
+import { defaultChainName } from "@/config";
 import { ChainSelect } from "./Chain";
 import { Warning } from "./Warning";
 import { User } from "./User";

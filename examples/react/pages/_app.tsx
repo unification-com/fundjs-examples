@@ -10,9 +10,9 @@ import {
   useColorModeValue,
 } from '@interchain-ui/react';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { chains, assets } from '../config/chains';
+import { chains, assets } from '@/config';
 
-import { aminoTypes, registry } from '../config/defaults';
+import { aminoTypes, registry } from '@/config';
 
 import '@interchain-ui/react/styles';
 import '@interchain-ui/react/globalStyles';

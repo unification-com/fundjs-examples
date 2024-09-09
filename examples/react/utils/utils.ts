@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import BigNumber from 'bignumber.js';
 import { Chain } from '@chain-registry/types';
-import { assets } from '../config/chains';
+import { assets } from '@/config';
 import { AssetList, Asset } from '@chain-registry/types';
 
 export function getChainLogo(chain: Chain) {
