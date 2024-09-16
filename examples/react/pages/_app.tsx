@@ -16,6 +16,8 @@ import { aminoTypes, registry } from '@/config';
 
 import '@interchain-ui/react/styles';
 import '@interchain-ui/react/globalStyles';
+import '../styles/globals.css'
+import {GasPrice} from "@cosmjs/stargate";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,7 +31,7 @@ const queryClient = new QueryClient({
 function CreateCosmosApp({ Component, pageProps }: AppProps) {
   const { themeClass } = useTheme();
 
-  // Include the Mainchain, Cosmos and IBC proto registry and amino convertors
+  // Include the FUND Mainchain, Cosmos and IBC proto registry and amino convertors
   // defined in ../config/defaults. This enables the application to sign Txs
   // containing those Msg types.
   const signerOptions: SignerOptions = {
@@ -38,6 +40,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
       return {
         aminoTypes,
         registry,
+        gasPrice: GasPrice.fromString('25.0nund'),
       };
     },
   };

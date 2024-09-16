@@ -124,9 +124,9 @@ export function Footer() {
         mb="$16"
         gap="$12"
       >
-        {products.map((product) => (
-          <Product key={product.name} {...product} />
-        ))}
+        {/*{products.map((product) => (*/}
+        {/*  <Product key={product.name} {...product} />*/}
+        {/*))}*/}
       </Box>
       <Box
         display="grid"
@@ -134,9 +134,9 @@ export function Footer() {
         gap="$12"
         mb="$19"
       >
-        {dependencies.map((dependency) => (
-          <Dependency key={dependency.name} {...dependency} />
-        ))}
+        {/*{dependencies.map((dependency) => (*/}
+        {/*  <Dependency key={dependency.name} {...dependency} />*/}
+        {/*))}*/}
       </Box>
       <Box mb="$6">
         <Divider />

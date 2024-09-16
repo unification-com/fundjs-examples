@@ -44,35 +44,7 @@ export function Header() {
             marginBottom: '$8',
           }}
         >
-          Create Cosmos App
-        </Text>
-        <Text as="h2" fontWeight="$bold">
-          <Text
-            as="span"
-            fontSize={{ mobile: '$3xl', tablet: '$8xl', desktop: '$8xl' }}
-          >
-            Welcome to&nbsp;
-          </Text>
-          <Text
-            as="span"
-            fontSize={{ mobile: '$3xl', tablet: '$8xl', desktop: '$8xl' }}
-            color={useColorModeValue('$primary500', '$primary200')}
-          >
-            {stacks.join(' + ')}
-            {' + '}
-
-            <Link
-              href={stargazejs.name}
-              target="_blank"
-              rel="noreferrer"
-              attributes={{
-                color: useColorModeValue('$primary500', '$primary200'),
-                fontSize: { mobile: '$4xl', tablet: '$8xl', desktop: '$8xl' },
-              }}
-            >
-              {stargazejs.name}
-            </Link>
-          </Text>
+          Payment Streams Demo
         </Text>
       </Box>
     </>

@@ -34,7 +34,7 @@ const aminoTypes = new AminoTypes(aminoConverters);
 
 // An advanced tx with combined signer using RPC client
 
-console.log("- Advanced Tx examples with custom combined signing client")
+console.log("- Payment Stream Tx examples with custom combined signing client")
 
 // first create the signer, using custom/extended getOfflineSignerAmino
 // to allow for account num to be passed to the hdPath method
@@ -60,41 +60,27 @@ getOfflineSignerAminoAccNum({
     return {clientWithSigner, queryClient}
 
 }).then(async clients => {
-    console.log("- Get balance for und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx")
-    const request = {
-        address: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx",
-        denom: "nund"
-    }
-    const balance = await clients.queryClient.cosmos.bank.v1beta1.balance(request);
+    console.log("- Create stream for 100 FUND/month to und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h")
+    const {createStream} = mainchain.stream.v1.MessageComposer.withTypeUrl;
 
-    console.log(`  - Balance before: ${balance.balance.amount} ${balance.balance.denom}`)
-    return clients
-}).then(async clients => {
-    // simple send tx
-    console.log("- Send 10 FUND to und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h")
-    const {send} = cosmos.bank.v1beta1.MessageComposer.withTypeUrl;
-
-    const msg = send({
-        amount: [
-            {
-                denom: 'nund',
-                amount: '10000000000'
-            }
-        ],
-        toAddress: "und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h",
-        fromAddress: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx"
-    });
-
-    console.log(msg)
+    const msg = createStream({
+        deposit: {
+            denom: 'nund',
+            amount: '100000000000'
+        },
+        flowRate: '38051',
+        receiver: 'und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h',
+        sender: 'und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx'
+    })
 
     const fee = {
         amount: [
             {
                 denom: 'nund',
-                amount: '25000000'
+                amount: '50000000'
             }
         ],
-        gas: '200000'
+        gas: '2000000'
     };
 
     const response = await clients.clientWithSigner.signAndBroadcast("und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx", [msg], fee);
@@ -102,7 +88,6 @@ getOfflineSignerAminoAccNum({
     console.log(`  - Tx: ${txHash}`)
 
     return {clients, txHash}
-
 }).then(async ret => {
     const clients = ret.clients
     const hash = ret.txHash
@@ -112,16 +97,26 @@ getOfflineSignerAminoAccNum({
 
     console.log(`  - Success: ${tx.txResponse.code === 0 ? "true" : "false"}`)
 
+    if(tx.txResponse.code !== 0) {
+        console.log(`  - Reason : ${tx.txResponse.rawLog}`)
+    }
+
     return clients
 }).then(async clients => {
-    console.log("- Get balance for und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx")
+    console.log("- Get streams for und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx")
     const request = {
-        address: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx",
-        denom: "nund"
+        receiverAddr: "und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h",
+        senderAddr: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx",
     }
-    const balance = await clients.queryClient.cosmos.bank.v1beta1.balance(request);
+    const streamRes = await clients.queryClient.mainchain.stream.v1.streamByReceiverSender(request);
 
-    console.log(`  - Balance after: ${balance.balance.amount} ${balance.balance.denom}`)
+    console.log(`  - Stream:`)
+    console.log(`    - sender: ${streamRes.stream.sender}`)
+    console.log(`    - receiver: ${streamRes.stream.receiver}`)
+    console.log(`    - deposit: ${streamRes.stream.stream.deposit.amount.toString()}${streamRes.stream.stream.deposit.denom}`)
+    console.log(`    - flowRate: ${streamRes.stream.stream.flowRate} nund/sec`)
+    console.log(`    - lastOutflowTime: ${streamRes.stream.stream.lastOutflowTime}`)
+    console.log(`    - depositZeroTime: ${streamRes.stream.stream.depositZeroTime}`)
     return clients
 })
     .catch(error => {

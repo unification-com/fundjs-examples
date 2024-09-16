@@ -52,13 +52,14 @@ export function useTx(chainName: string) {
 
     try {
       const txRaw = cosmos.tx.v1beta1.TxRaw;
-      const fee = options.fee || await estimateFee(msgs);
+      const fee = await estimateFee(msgs);
       const client = await getSigningStargateClient();
+
       const signed = await client.sign(address, msgs, fee, '');
 
       if (!client) return new TxResult({ error: new TxError('Invalid stargate client') });
-      if (!signed) return new TxResult({ error: new TxError('Invalid transaction') });
 
+      if (!signed) return new TxResult({ error: new TxError('Invalid transaction') });
       const response = await client.broadcastTx(Uint8Array.from(txRaw.encode(signed).finish()));
       // Type error: Argument of type 'import("/Users/redacted/code/cosmology/products/create-cosmos-app/node_modules/@cosmos-kit/core/node_modules/@cosmjs/stargate/build/stargateclient").DeliverTxResponse' is not assignable to parameter of type 'import("/Users/redacted/code/cosmology/products/create-cosmos-app/node_modules/@cosmjs/stargate/build/stargateclient").DeliverTxResponse'.
       // Types of property 'gasUsed' are incompatible.

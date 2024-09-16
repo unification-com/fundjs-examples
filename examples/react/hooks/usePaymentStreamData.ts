@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useChain } from '@cosmos-kit/react';
-import { useQueries } from '@tanstack/react-query';
-import { Stream } from '@unification-com/fundjs-react/mainchain/stream/v1/stream';
-import { useQueryHooks, useRpcQueryClient } from '.';
+import { useQueryHooks } from '.';
 import { paginate } from '@/utils';
 
 (BigInt.prototype as any).toJSON = function () {
@@ -12,11 +10,23 @@ import { paginate } from '@/utils';
 export function usePaymentStreamData(chainName: string) {
     const [isLoading, setIsLoading] = useState(false);
     const { address } = useChain(chainName);
-    const { rpcQueryClient } = useRpcQueryClient(chainName);
     const { mainchain, isReady, isFetching } = useQueryHooks(chainName);
 
-    const paymentStreamsQuery = mainchain.stream.v1.useStreams({
+    const paymentStreamsQueryAsSender = mainchain.stream.v1.useAllStreamsForSender({
         request: {
+            senderAddr: (address) ? address : '',
+            pagination: paginate(50n, true),
+        },
+        options: {
+            enabled: isReady,
+            staleTime: Infinity,
+            select: ({streams}) => streams,
+        },
+    })
+
+    const paymentStreamsQueryAsReceiver = mainchain.stream.v1.useAllStreamsForReceiver({
+        request: {
+            receiverAddr: (address) ? address : '',
             pagination: paginate(50n, true),
         },
         options: {
@@ -27,11 +37,13 @@ export function usePaymentStreamData(chainName: string) {
     })
 
     const singleQueries = {
-        streams: paymentStreamsQuery,
+        streamsAsSender: paymentStreamsQueryAsSender,
+        streamsAsReceiver: paymentStreamsQueryAsReceiver,
     };
 
     const staticQueries = [
-        singleQueries.streams,
+        singleQueries.streamsAsSender,
+        singleQueries.streamsAsReceiver,
     ];
 
     useEffect(() => {
@@ -67,7 +79,8 @@ export function usePaymentStreamData(chainName: string) {
     }, [isStaticQueriesFetching, isReady]);
 
     const refetch = () => {
-        paymentStreamsQuery.forEach((query) => query.remove());
+        paymentStreamsQueryAsSender.refetch();
+        paymentStreamsQueryAsReceiver.refetch();
     };
 
     return { data: { ...singleQueriesData }, isLoading, refetch };

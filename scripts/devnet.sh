@@ -26,26 +26,33 @@
 set -e
 
 # Devnet configuration
-BASE_TEST_PATH="/tmp/und_devnets"
 CHAIN_ID="FUND-DevNet"
 DEFAULT_UND_VERS=$(curl -s https://api.github.com/repos/unification-com/mainchain/releases/latest | jq -r '.tag_name')
-MNEMONIC="wish glad forget ski rhythm mouse omit gun fatal whale switch gift nephew cactus noise athlete spin damp never jacket absorb client top grass"
-
-# Genesis accounts. Change if using different mnemonic, and exclude acount 0 which is used for the validator
-GENESIS_WALLETS=(
-"und1l6tdlphr2tf0yrpd3w457x472n7ghsfk76j3k2"
-"und1z6gj7u66srx9z2jn09d2cyax78xeznhps39msa"
-"und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx"
-"und1dngluf3d9hevvsl0sv6nwul38k72fqept5mwmn"
-"und1gld5c4mxwa7skk6lasmj9lxd0cv8jdl5kh3lz5"
-"und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h"
-"und1grp3h7zlm08zwdhlfvsgc6wwl5ezxee9rzlsrz"
-"und1xl0shexdersxapun7kns3zwct83k53y8a23jtr"
-"und1leh9323rsgw6ljt7xpx2pgfdk0q3drr4mv9ytk"
-)
-
 
 UND_VERS="${1}"
+
+BASE_DIR="$(pwd)"
+CONFIG="${BASE_DIR}/scripts/devnet.json"
+
+function get_conf() {
+  local P=${1}
+  cat < "${CONFIG}" | jq -r "${P}"
+}
+
+if ! test -f "$CONFIG"; then
+  echo "${CONFIG} not found. Using defaults."
+  CONFIG="${BASE_DIR}/scripts/default.devnet.json"
+fi
+
+echo "Loading ${CONFIG}"
+MNEMONIC=$(cat < "${CONFIG}" | jq -r ".mnemonic")
+readarray -t GENESIS_WALLETS < <(cat < "${CONFIG}" | jq -cr '.genesis_wallets[]')
+BASE_TEST_PATH=$(cat < "${CONFIG}" | jq -r ".base_path")
+
+if [ -z "$BASE_TEST_PATH" ]; then
+  echo "No base_path configured. Using default /tmp/und_devnets"
+  BASE_TEST_PATH="/tmp/und_devnets"
+fi
 
 if [ -z "$UND_VERS" ]; then
   echo "UND_VERS not set. Using und ${DEFAULT_UND_VERS}"
@@ -76,6 +83,11 @@ if [ -d "$TEST_PATH" ]; then
   echo "or start the chain again using:"
   echo ""
   echo "  ${UND_BIN} start --home ${DATA_DIR}"
+  echo ""
+  echo "You can also wipe the chain dat and start from"
+  echo "block 0 by running the following befor starting:"
+  echo ""
+  echo "  ${UND_BIN} tendermint unsafe-reset-all --home ${DATA_DIR}"
   echo ""
   exit 0
 fi
@@ -111,6 +123,11 @@ sed -i "s/minimum-gas-prices = \"\"/minimum-gas-prices = \"25.0nund\"/g" "${DATA
 sed -i "s/enable = false/enable = true/g" "${DATA_DIR}/config/app.toml"
 sed -i "s/swagger = false/swagger = true/g" "${DATA_DIR}/config/app.toml"
 
+
+sed -i "s/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g" "${DATA_DIR}/config/app.toml"
+sed -i "s/cors_allowed_origins = \[\]/cors_allowed_origins = \[\"\*\"\]/g" "${DATA_DIR}/config/config.toml"
+
+
 # add accounts to genesis
 "${UND_BIN}" genesis add-genesis-account validator 1000000000000000nund --home "${DATA_DIR}" --keyring-backend test
 "${UND_BIN}" genesis add-genesis-account ent1 1000000000000000nund --home "${DATA_DIR}" --keyring-backend test
@@ -133,6 +150,3 @@ echo "DevNet configuration complete. To start, run:"
 echo ""
 echo "${UND_BIN} start --home ${DATA_DIR}"
 echo ""
-#"${UND_BIN}" start --home "${DATA_DIR}"
-
-#"${UND_BIN}" --home ${DATA_DIR} keys list --keyring-backend test --output json | jq

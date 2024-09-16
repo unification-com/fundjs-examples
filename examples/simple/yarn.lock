@@ -9,10 +9,10 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
-"@chain-registry/types@^0.45.68":
-  version "0.45.68"
-  resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.45.68.tgz#4f1bce521e321890b662dbe2041921d84e436239"
-  integrity sha512-MjcjgrPJ+iChYwFnkQw4c82kbwGF1AAq0gXlxdenhDd2b1F7sdQ4E0l9bYIZwrq9nrQMmJcedB0H5Ioj6eyZTA==
+"@chain-registry/types@^0.45.70":
+  version "0.45.70"
+  resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.45.70.tgz#659cf8dbd9beff0bae97b8167962e28bbb65ae2a"
+  integrity sha512-+1wxCvwt7EffLZzTC38tducoKoSoYVNfU7CEJoSo6mM8i3Xj9W6Wef9YGSOKPSdmYTxoHmJFLbBFSZPTOZrbSA==
 
 "@confio/ics23@^0.6.8":
   version "0.6.8"
@@ -380,10 +380,10 @@
   dependencies:
     undici-types "~6.19.2"
 
-"@unification-com/fundjs@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@unification-com/fundjs/-/fundjs-0.0.8.tgz#a9365137bf7606dbfd362280b9f62ebc4666235d"
-  integrity sha512-AOoeeJtRdo4XNwZZ2XISF11Tga0K+tNAOM4YdCi8BXpyPZ3IMpWXHzoox6CP/k2f01pRGyFwSi97v6ELjls8CQ==
+"@unification-com/fundjs@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@unification-com/fundjs/-/fundjs-0.0.9.tgz#3fd62a8cddccabaf0b1c9e5ae3f472d0e7ff57ab"
+  integrity sha512-c4jUQ4w7Gw9iRhtW7VUAwNPJwaLPwnWM6iK4biBlhnTg8K3oY7lqhjH8B9DWZBZbhZ9UQHIrcYf7bvcUlQjJIA==
   dependencies:
     "@cosmjs/amino" "^0.32.4"
     "@cosmjs/crypto" "^0.32.4"
@@ -450,12 +450,12 @@ brorand@^1.1.0:
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==
 
-chain-registry@^1.63.80:
-  version "1.63.85"
-  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.63.85.tgz#95dbbdc54cd09031e27f98ad96e6149e6a017f33"
-  integrity sha512-9uGFzy3ZTqscGX38FkmFsiQn+2/YuzTmc0H5L3wrVznbr0UnIj53LtgHRsl5B/fByv4DPtqTNek71UYwdVO8lg==
+chain-registry@^1.63.87:
+  version "1.63.87"
+  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.63.87.tgz#5419a6b8c77153beb4f8021bd25000f1bb7cbc97"
+  integrity sha512-aqReYqGU3oAKmimD4T7rBeYm405DCYyz6dWkXHqAbZxA40zX4+IOia4HbV7hbi7GoiiJ+VnAWoLJX/OU0LrocA==
   dependencies:
-    "@chain-registry/types" "^0.45.68"
+    "@chain-registry/types" "^0.45.70"
 
 combined-stream@^1.0.8:
   version "1.0.8"

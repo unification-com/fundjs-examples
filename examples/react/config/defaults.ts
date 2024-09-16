@@ -1,4 +1,4 @@
-import { GeneratedType, Registry } from '@cosmjs/proto-signing';
+import { Registry } from '@cosmjs/proto-signing';
 import { AminoTypes } from '@cosmjs/stargate';
 import {
     cosmosAminoConverters,
@@ -11,7 +11,7 @@ import {
 
 export const defaultChainName = 'unification';
 
-const protoRegistry: ReadonlyArray<[string, GeneratedType]> = [
+const protoRegistry = [
     ...cosmosProtoRegistry,
     ...ibcProtoRegistry,
     ...mainchainProtoRegistry,

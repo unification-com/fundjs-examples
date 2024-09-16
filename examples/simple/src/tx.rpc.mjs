@@ -1,8 +1,10 @@
 import { getSigningCosmosClient, mainchain, cosmos} from '@unification-com/fundjs';
 import { getOfflineSignerAmino} from 'cosmjs-utils';
 
+import { MNEMONIC } from './defaults.mjs'
+
 const RPC_ENDPOINT = "http://localhost:26657"
-const MNEMONIC = "wish glad forget ski rhythm mouse omit gun fatal whale switch gift nephew cactus noise athlete spin damp never jacket absorb client top grass"
+
 const {createRPCQueryClient} = mainchain.ClientFactory;
 
 // A simple tx with signer using RPC client

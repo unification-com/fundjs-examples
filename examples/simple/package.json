@@ -34,8 +34,8 @@
     "@cosmjs/crypto": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "^0.32.4",
-    "@unification-com/fundjs": "^0.0.8",
-    "chain-registry": "^1.63.80",
+    "@unification-com/fundjs": "^0.0.9",
+    "chain-registry": "^1.63.87",
     "cosmjs-utils": "^0.1.0"
   }
 }
