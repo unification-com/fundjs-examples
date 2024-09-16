@@ -1,0 +1,11 @@
+**/node_modules/
+**/.DS_Store
+**/dist
+**/yarn-error.log
+lerna-debug.log
+
+# IDEs
+.vscode
+.idea
+
+scripts/devnet.json

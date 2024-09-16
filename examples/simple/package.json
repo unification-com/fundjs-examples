@@ -1,0 +1,41 @@
+{
+  "name": "simple",
+  "version": "0.0.0",
+  "private": true,
+  "description": "> TODO: description",
+  "author": "Codegnosis <paul@codegnosis.co.uk>",
+  "homepage": "https://github.com/unification-com/fundjs-examples#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unification-com/fundjs-examples.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/simple.test.js",
+    "runrpcqueries": "node src/queries.rpc.mjs",
+    "runlcdqueries": "node src/queries.lcd.mjs",
+    "runrpctxs": "node src/tx.rpc.mjs",
+    "runrpccustomtxs": "node src/custom.tx.rpc.mjs",
+    "runall": "yarn run runrpcqueries && yarn run runlcdqueries && yarn run runrpctxs && yarn run runrpccustomtxs"
+  },
+  "bugs": {
+    "url": "https://github.com/unification-com/fundjs-examples/issues"
+  },
+  "dependencies": {
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/crypto": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
+    "@unification-com/fundjs": "^0.0.9",
+    "chain-registry": "^1.63.87",
+    "cosmjs-utils": "^0.1.0"
+  }
+}
