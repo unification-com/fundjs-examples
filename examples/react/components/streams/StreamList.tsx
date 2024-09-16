@@ -14,6 +14,7 @@ import {useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
 import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
 
+
 export type StreamsProps = {
     chainName: string;
 };
