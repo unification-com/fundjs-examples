@@ -12,6 +12,8 @@ import {Stream} from "@/components/streams/Stream";
 import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
 import {useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
+import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+
 
 export type StreamsProps = {
     chainName: string;
@@ -144,7 +146,7 @@ export function StreamList({chainName}: StreamsProps) {
     const asSenderStreams = (
         <>
             <h2>Streams as Sender</h2>
-            {data.streamsAsSender?.map((streamRes, index) => (
+            {data.streamsAsSender?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
@@ -159,7 +161,7 @@ export function StreamList({chainName}: StreamsProps) {
     const asReceiverStreams = (
         <>
             <h2>Streams as Receiver</h2>
-            {data.streamsAsReceiver?.map((streamRes, index) => (
+            {data.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
@@ -220,7 +222,7 @@ export function StreamList({chainName}: StreamsProps) {
 
                             <form onSubmit={handleCreateNewStreamSubmit} className={"payment-stream-form"}>
                                 <Text fontSize="$lg" fontWeight="$bold">
-                                    2. Verify the following, then click "Create"
+                                    2. Verify the following, then click Create
                                 </Text>
                                 <Text fontSize="$lg">
                                     <strong>Receiver:</strong> {newStreamFormData.receiver}
