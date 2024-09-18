@@ -9,11 +9,8 @@ export type UserProps = {
 
 export function User({ name, icon = <Astronaut /> }: UserProps) {
   return <Stack direction="vertical">
-    <Box width="$19" height="$19" mx="auto" borderRadius="$full">
-      {icon}
-    </Box>
     <Box textAlign="center" py="$4" mb="$6">
-      <Text color={useColorModeValue("$gray700", "$white")} fontSize="$xl" fontWeight="$medium">{name}</Text>
+      <Text color={useColorModeValue("$gray700", "$white")} fontSize="$lg" fontWeight="$medium">{name}</Text>
     </Box>
   </Stack>
 }

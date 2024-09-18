@@ -64,6 +64,14 @@ const unificationDevnet: Chain = {
             }
         ]
     },
+    "explorers": [
+        {
+            "kind": "ping.pub",
+            "url": "http://localhost:3001/u",
+            "tx_page": "http://localhost:3001/u/tx/${txHash}",
+            "account_page": "http://localhost:3001/u/account/${accountAddress}"
+        }
+    ]
 }
 
 export const chains: Chain[] = [unificationMainNet, unificationTestnet, unificationDevnet]

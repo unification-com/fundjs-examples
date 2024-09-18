@@ -10,8 +10,8 @@ const MessageComposer = mainchain.stream.v1.MessageComposer;
 
 export type onClaimStreamOptions = {
     sender: string;
-    success?: (remaining: Coin) => void
-    error?: () => void
+    success?: (remaining: Coin, txHash: string | undefined) => void
+    error?: (errMsg: string) => void
 }
 
 export function useClaimStream(chainName: string) {
@@ -21,7 +21,7 @@ export function useClaimStream(chainName: string) {
 
     const chainCoin = getCoin(chainName);
 
-    async function onClaimStream({ sender, success = (remaining) => { }, error = () => { } }: onClaimStreamOptions) {
+    async function onClaimStream({ sender, success = (remaining, txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onClaimStreamOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.claimStream({
@@ -38,7 +38,7 @@ export function useClaimStream(chainName: string) {
             setIsClaiming(true);
             const res = await tx([msg], { fee });
             if (res.error) {
-                error();
+                error(res.errorMsg);
                 console.error(res.error);
                 toast.error(res.errorMsg);
             } else {
@@ -58,11 +58,13 @@ export function useClaimStream(chainName: string) {
                         }
                     }
                 }
-                success(remaining);
+                const txHash = res?.response?.transactionHash
+                success(remaining, txHash);
                 toast.success('Claim Stream successful');
             }
         } catch (e) {
-            error();
+            // @ts-ignore
+            error(e.error);
             console.error(e);
             toast.error('Claim Stream failed');
         } finally {

@@ -66,22 +66,23 @@ export function Wallet({
       onChainChange(selected);
     }
   }, []);
-
   return (
     <Box py="$16">
-      <Box mx="auto" maxWidth="28rem" attributes={{ mb: "$12" }}>
-        <ChainSelect
+      <Box mx="auto" maxWidth="28rem" attributes={{ mb: "$2" }}>
+          {
+          chains.length > 1 ?
+          <ChainSelect
           chains={chains}
           chainName={chain.chain_name}
           onChange={handleChainChange}
-        />
+        /> : null}
       </Box>
       <Stack
         direction="vertical"
         attributes={{
           mx: "auto",
           px: "$8",
-          py: "$15",
+          py: "$1",
           maxWidth: "21rem",
           borderRadius: "$lg",
           justifyContent: "center",

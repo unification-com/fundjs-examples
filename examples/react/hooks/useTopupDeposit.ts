@@ -11,8 +11,8 @@ const MessageComposer = mainchain.stream.v1.MessageComposer;
 export type onTopUpDepositOptions = {
     receiver: string;
     deposit: number;
-    success?: (depositZeroTime: string) => void
-    error?: () => void
+    success?: (depositZeroTime: string, txHash: string | undefined) => void
+    error?: (errMsg: string) => void
 }
 
 export function useTopUpDeposit(chainName: string) {
@@ -22,7 +22,7 @@ export function useTopUpDeposit(chainName: string) {
 
     const chainCoin = getCoin(chainName);
 
-    async function onTopUpDeposit({ receiver, deposit, success = (depositZeroTime) => { }, error = () => { } }: onTopUpDepositOptions) {
+    async function onTopUpDeposit({ receiver, deposit, success = (depositZeroTime, txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onTopUpDepositOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.topUpDeposit({
@@ -40,7 +40,7 @@ export function useTopUpDeposit(chainName: string) {
             setIsToppingUp(true);
             const res = await tx([msg], { fee });
             if (res.error) {
-                error();
+                error(res.errorMsg);
                 console.error(res.error);
                 toast.error(res.errorMsg);
             } else {
@@ -58,11 +58,13 @@ export function useTopUpDeposit(chainName: string) {
                         }
                     }
                 }
-                success(depositZeroTime);
+                const txHash = res?.response?.transactionHash
+                success(depositZeroTime, txHash);
                 toast.success('Top up deposit successful');
             }
         } catch (e) {
-            error();
+            // @ts-ignore
+            error(e.error);
             console.error(e);
             toast.error('Top up deposit failed');
         } finally {
