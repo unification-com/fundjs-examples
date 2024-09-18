@@ -169,6 +169,7 @@ export function StreamList({chainName}: StreamsProps) {
             </>
         )
         refetchStreamData()
+        refetchBalanceData()
     }
 
     function onCreateNewStreamError(errMsg: string) {
@@ -214,6 +215,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     refetchStreams={refetchStreamData}
+                    refetchBalanceData={refetchBalanceData}
                 />
             ))}
         </>
@@ -231,6 +233,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     refetchStreams={refetchStreamData}
+                    refetchBalanceData={refetchBalanceData}
                 />
             ))}
         </>

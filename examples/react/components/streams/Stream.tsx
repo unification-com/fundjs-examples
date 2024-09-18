@@ -25,6 +25,7 @@ export type StreamProps = {
     receiver: string;
     chainName: string;
     refetchStreams?: () => void
+    refetchBalanceData?: () => void
 };
 
 export function Stream({
@@ -33,6 +34,7 @@ export function Stream({
                            receiver,
                            chainName,
                            refetchStreams = () => {},
+                           refetchBalanceData = () => {},
                        }: StreamProps) {
 
     const { address } = useChain(chainName);
@@ -99,6 +101,7 @@ export function Stream({
     function handleOnCloseStatusModal() {
         closeStatusModal()
         refetchStreams()
+        refetchBalanceData()
     }
 
     function onClaimStreamSuccess(remaining: Coin, txHash: string | undefined) {
