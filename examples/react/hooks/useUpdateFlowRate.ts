@@ -11,8 +11,8 @@ const MessageComposer = mainchain.stream.v1.MessageComposer;
 export type onUpdateFlowRateOptions = {
     receiver: string;
     flowRate: number;
-    success?: (newFlowRate: string, depositZeroTime: string, remainingDeposit: string) => void
-    error?: () => void
+    success?: (newFlowRate: string, depositZeroTime: string, remainingDeposit: string, txHash: string | undefined) => void
+    error?: (errMsg: string) => void
 }
 
 export function useUpdateFlowRate(chainName: string) {
@@ -22,7 +22,7 @@ export function useUpdateFlowRate(chainName: string) {
 
     const chainCoin = getCoin(chainName);
 
-    async function onUpdateFlowRate({ receiver, flowRate, success = (newFlowRate, depositZeroTime, remainingDeposit) => { }, error = () => { } }: onUpdateFlowRateOptions) {
+    async function onUpdateFlowRate({ receiver, flowRate, success = (newFlowRate, depositZeroTime, remainingDeposit, txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onUpdateFlowRateOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.updateFlowRate({
@@ -40,7 +40,7 @@ export function useUpdateFlowRate(chainName: string) {
             setIsUpdatingFlowRate(true);
             const res = await tx([msg], { fee });
             if (res.error) {
-                error();
+                error(res.errorMsg);
                 console.error(res.error);
                 toast.error(res.errorMsg);
             } else {
@@ -66,11 +66,13 @@ export function useUpdateFlowRate(chainName: string) {
                         }
                     }
                 }
-                success(newFlowRate, depositZeroTime, remainingDeposit);
+                const txHash = res?.response?.transactionHash
+                success(newFlowRate, depositZeroTime, remainingDeposit, txHash);
                 toast.success('Update flow rate successful');
             }
         } catch (e) {
-            error();
+            // @ts-ignore
+            error(e.error);
             console.error(e);
             toast.error('Update flow rate failed');
         } finally {

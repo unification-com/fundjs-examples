@@ -1,14 +1,14 @@
 import {
     BasicModal,
     Box,
-    Button,
+    Button, Link, Spinner,
     Text,
 } from "@interchain-ui/react";
 
 import {
     Stream as IStream
 } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
-import {exponentiate, getCoin, getExponent} from "@/utils";
+import {exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
 import {useEffect, useState} from "react";
 import {useChain} from "@cosmos-kit/react";
 import {useClaimStream} from "@/hooks/useClaimStream";
@@ -24,6 +24,7 @@ export type StreamProps = {
     sender: string;
     receiver: string;
     chainName: string;
+    refetchStreams?: () => void
 };
 
 export function Stream({
@@ -31,6 +32,7 @@ export function Stream({
                            sender,
                            receiver,
                            chainName,
+                           refetchStreams = () => {},
                        }: StreamProps) {
 
     const { address } = useChain(chainName);
@@ -46,8 +48,9 @@ export function Stream({
     const { modal: topupDepositModal, open: openTopupDepositModal, close: closeTopupDepositModal } = useModal("");
     const { modal: updateFlowRateModal, open: openUpdateFlowRateModal, close: closeUpdateFlowRateModal } = useModal("");
     const { modal: sendUpdateFlowRateModal, open: openSendUpdateFlowRateModal, close: closeSendUpdateFlowRateModal } = useModal("");
-
     const { modal: cancelStreamModal, open: openCancelStreamModal, close: closeCancelStreamModal } = useModal("");
+    const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
+    const [ modalContent, setModalContent ] = useState(<></>)
 
 
     const [topUpFormData, setTopUpFormData] = useState({
@@ -62,6 +65,7 @@ export function Stream({
         flowRate: 0,
     })
 
+    const explorer = getExplorer(chainName)
     useEffect(() => {
         const interval = setInterval(() => {
             const timeSince = Date.now() - streamData.lastOutflowTime.getTime()
@@ -79,14 +83,52 @@ export function Stream({
 
     function handleClaimSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        openStatusModal();
         onClaimStream({
             sender,
             success: onClaimStreamSuccess,
+            error: onSendTxError,
         })
     }
 
-    function onClaimStreamSuccess(remaining: Coin) {
+    function handleOnCloseStatusModal() {
+        closeStatusModal()
+        refetchStreams()
+    }
+
+    function onClaimStreamSuccess(remaining: Coin, txHash: string | undefined) {
         setStreamData({...streamData, lastOutflowTime: new Date(), deposit: remaining})
+
+        let explorerUrl = <>{txHash}</>
+        if(explorer.tx_page !== undefined && txHash != null) {
+            const url = explorer.tx_page.replace("${txHash}", txHash)
+            explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
+        }
+
+        setModalContent(
+            <Text fontSize="$lg">
+                Claim successful<br />
+                {explorerUrl}
+            </Text>
+        )
+    }
+
+    function onSendTxError(errMsg: string) {
+        setModalContent(
+            <>
+                <Text fontSize="$lg" fontWeight={"$bold"}>
+                    Error:
+                </Text>
+                <Text fontSize="$lg">
+                    {errMsg}
+                </Text>
+            </>
+        )
     }
 
     function handleTopupDepositInputChange(e: { target: { name: any; value: any; }; }) {
@@ -96,19 +138,37 @@ export function Stream({
 
     function handleTopupDepositSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        openStatusModal();
+        closeTopupDepositModal()
         const nund = exponentiate(topUpFormData.deposit, exponent)
         onTopUpDeposit({
             receiver,
             deposit: nund,
             success: onTopUpDepositSuccess,
+            error: onSendTxError,
         })
-        closeTopupDepositModal()
     }
 
-    function onTopUpDepositSuccess(depositZeroTime: string) {
+    function onTopUpDepositSuccess(depositZeroTime: string, txHash: string | undefined) {
         const nund = exponentiate(topUpFormData.deposit, exponent)
         const newDeposit = coin(parseInt(streamData.deposit.amount, 10) + nund, "nund")
         setStreamData({...streamData, deposit: newDeposit, depositZeroTime: new Date(depositZeroTime)})
+
+        let explorerUrl = <>{txHash}</>
+        if(explorer.tx_page !== undefined && txHash != null) {
+            const url = explorer.tx_page.replace("${txHash}", txHash)
+            explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
+        }
+
+        setModalContent(<Text fontSize="$lg">
+            Top Up successful<br />
+            {explorerUrl}
+        </Text>)
     }
 
     function handleUpdateFlowRateInputChange(e: { target: { name: any; value: any; }; }) {
@@ -118,6 +178,13 @@ export function Stream({
 
     function handleUpdateFlowRateSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        closeSendUpdateFlowRateModal()
+
         const nund = exponentiate(updateFlowFormData.fund, exponent)
         const nundCoin = `${nund}nund`
 
@@ -125,7 +192,7 @@ export function Stream({
             coin: nundCoin,
             period: updateFlowFormData.period,
             duration: updateFlowFormData.duration,
-            success: onCalculateFlowRateSuccess
+            success: onCalculateFlowRateSuccess,
         })
     }
 
@@ -137,16 +204,23 @@ export function Stream({
 
     function handleSendUpdateFlowRateSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        openStatusModal();
+        closeSendUpdateFlowRateModal()
 
         onUpdateFlowRate({
             receiver,
             flowRate: updateFlowFormData.flowRate,
             success: onSendUpdateFlowRateSuccess,
+            error: onSendTxError,
         })
-        closeSendUpdateFlowRateModal()
     }
 
-    function onSendUpdateFlowRateSuccess(newFlowRate: string, depositZeroTime: string, remainingDeposit: string) {
+    function onSendUpdateFlowRateSuccess(newFlowRate: string, depositZeroTime: string, remainingDeposit: string, txHash: string | undefined) {
         const parsedCoins = parseCoins(remainingDeposit)
         setStreamData({
             ...streamData,
@@ -156,9 +230,20 @@ export function Stream({
             lastOutflowTime: new Date(),
             }
         )
+
+        let explorerUrl = <>{txHash}</>
+        if(explorer.tx_page !== undefined && txHash != null) {
+            const url = explorer.tx_page.replace("${txHash}", txHash)
+            explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
+        }
+
+        setModalContent(<Text fontSize="$lg">
+            Update flow rate successful<br />
+            {explorerUrl}
+        </Text>)
     }
 
-    function onCancelStreamSuccess() {
+    function onCancelStreamSuccess(txHash: string | undefined) {
 
         setStreamData({
                 ...streamData,
@@ -169,16 +254,32 @@ export function Stream({
             }
         )
 
-        closeCancelStreamModal()
+        let explorerUrl = <>{txHash}</>
+        if(explorer.tx_page !== undefined && txHash != null) {
+            const url = explorer.tx_page.replace("${txHash}", txHash)
+            explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
+        }
+
+        setModalContent(<Text fontSize="$lg">
+            Cancel stream successful <br />
+            {explorerUrl}
+        </Text>)
     }
 
     function handleCancelStreamSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
-
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        openStatusModal();
+        closeCancelStreamModal()
 
         onCancelStream({
             receiver,
-            success: onCancelStreamSuccess
+            success: onCancelStreamSuccess,
+            error: onSendTxError,
         })
     }
 
@@ -418,6 +519,23 @@ export function Stream({
                     <br />
                     <button type="submit">Cancel Stream</button>
                 </form>
+            </BasicModal>
+
+            <BasicModal
+                title={
+                    <Box maxWidth="40rem">
+                        <Text fontSize="$xl" fontWeight="$bold"></Text>
+                    </Box>
+                }
+                isOpen={statusModal.open}
+                onOpen={openStatusModal}
+                onClose={handleOnCloseStatusModal}
+            >
+
+                <Box position="relative" maxWidth={"$containerSm"}>
+                    { modalContent }
+                </Box>
+
             </BasicModal>
         </Box>
     )

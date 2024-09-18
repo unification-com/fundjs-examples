@@ -10,8 +10,8 @@ const MessageComposer = mainchain.stream.v1.MessageComposer;
 
 export type onCancelStreamOptions = {
     receiver: string;
-    success?: () => void
-    error?: () => void
+    success?: (txHash: string | undefined) => void
+    error?: (errMsg: string) => void
 }
 
 export function useCancelSteam(chainName: string) {
@@ -21,7 +21,7 @@ export function useCancelSteam(chainName: string) {
 
     const chainCoin = getCoin(chainName);
 
-    async function onCancelStream({ receiver,  success = () => { }, error = () => { } }: onCancelStreamOptions) {
+    async function onCancelStream({ receiver,  success = (txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onCancelStreamOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.cancelStream({
@@ -38,15 +38,17 @@ export function useCancelSteam(chainName: string) {
             setIsCanellingStream(true);
             const res = await tx([msg], { fee });
             if (res.error) {
-                error();
+                error(res.errorMsg);
                 console.error(res.error);
                 toast.error(res.errorMsg);
             } else {
-                success();
+                const txHash = res?.response?.transactionHash
+                success(txHash);
                 toast.success('Cancel Stream successful');
             }
         } catch (e) {
-            error();
+            // @ts-ignore
+            error(e.error);
             console.error(e);
             toast.error('Cancel Stream failed');
         } finally {

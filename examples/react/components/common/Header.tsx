@@ -22,7 +22,7 @@ export function Header() {
 
   return (
     <>
-      <Box display="flex" justifyContent="end" mb="$8">
+      <Box display="flex" justifyContent="end" mb="$1">
         <Button
           intent="secondary"
           size="sm"
@@ -39,9 +39,9 @@ export function Header() {
         <Text
           as="h1"
           fontWeight="$extrabold"
-          fontSize={{ mobile: '$6xl', tablet: '$10xl' }}
+          fontSize={{ mobile: '$2xl', tablet: '$5xl' }}
           attributes={{
-            marginBottom: '$8',
+            marginBottom: '$1',
           }}
         >
           Payment Streams Demo

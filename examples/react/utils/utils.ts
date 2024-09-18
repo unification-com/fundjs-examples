@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import BigNumber from 'bignumber.js';
 import {Chain} from '@chain-registry/types';
-import {assets} from '@/config';
+import {assets, chains} from '@/config';
 import {AssetList, Asset} from '@chain-registry/types';
 
 export function getChainLogo(chain: Chain) {
@@ -31,6 +31,19 @@ export const getChainAssets = (chainName: string) => {
     return assets.find((chain) => chain.chain_name === chainName) as AssetList;
 };
 
+export const getChainInfo = (chainName: string) => {
+    return chains.find((chain) => chain.chain_name === chainName) as Chain;
+};
+
+export const getExplorerList = (chainName: string) => {
+    const chainInfo = getChainInfo(chainName);
+    return chainInfo.explorers ? chainInfo.explorers : [];
+};
+
+export const getExplorer = (chainName: string) => {
+    const explorerList = getExplorerList(chainName);
+    return explorerList.length > 0 ? explorerList[0] : {};
+};
 export const getCoin = (chainName: string) => {
     const chainAssets = getChainAssets(chainName);
     return chainAssets.assets[0] as Asset;

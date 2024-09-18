@@ -1,19 +1,19 @@
 import {useChain} from "@cosmos-kit/react";
 import {
-    Box,
+    BasicModal,
+    Box, Link,
     Spinner,
     Tabs,
     Text, toast,
     useColorModeValue,
 } from "@interchain-ui/react";
 import {useModal, usePaymentStreamData} from "@/hooks";
-import {exponentiate, getCoin, getExponent} from "@/utils";
+import {exponentiate, getCoin, getExponent, getExplorer} from "@/utils";
 import {Stream} from "@/components/streams/Stream";
 import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
 import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
-
 
 export type StreamsProps = {
     chainName: string;
@@ -25,6 +25,8 @@ export function StreamList({chainName}: StreamsProps) {
     const {isCalculating, onCalculateFlowRate} = useCalculateFlowRate(chainName);
     const {isCreating, onCreateStream} = useCreateStream(chainName)
     const [isCalculated, setIsCalculated] = useState(false)
+    const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
+    const [ modalContent, setModalContent ] = useState(<></>)
 
     const [initStreamFormData, setInitStreamFormData] = useState({
         fund: 100,
@@ -40,17 +42,29 @@ export function StreamList({chainName}: StreamsProps) {
         depositEndTime: 0,
     })
 
+    useEffect(() => {
+        refetch()
+    }, [address]);
+
     const coin = getCoin(chainName);
     const exponent = getExponent(chainName);
+    const explorer = getExplorer(chainName)
 
     function handleCreateNewStreamSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
+        setModalContent(<Text fontSize="$lg">
+            <Spinner
+                size="$5xl"
+            /> Sending transaction
+        </Text>)
+        openStatusModal();
         const nund = exponentiate(newStreamFormData.deposit, exponent)
         onCreateStream({
             receiver: newStreamFormData.receiver,
             deposit: nund,
             flowRate: newStreamFormData.flowRate,
             success: onCreateNewStreamSuccess,
+            error: onCreateNewStreamError,
         })
     }
 
@@ -124,11 +138,39 @@ export function StreamList({chainName}: StreamsProps) {
         setIsCalculated(false)
     }
 
-    function onCreateNewStreamSuccess() {
+    function onCreateNewStreamSuccess(txHash: string | undefined) {
         resetFormData()
+        let output = <>{txHash}</>
+        if(explorer.tx_page !== undefined && txHash != null) {
+            const url = explorer.tx_page.replace("${txHash}", txHash)
+            output = <Link href={url} target={"_blank"}>{txHash}</Link>
+        }
+        setModalContent(
+            <>
+                <Text fontSize="$lg">
+                    Stream created successfully in tx:
+                </Text>
+                <Text fontSize="$lg">
+                    {output}
+                </Text>
+            </>
+        )
         refetch()
     }
 
+    function onCreateNewStreamError(errMsg: string) {
+
+        setModalContent(
+            <>
+                <Text fontSize="$lg" fontWeight={"$bold"}>
+                    Error creating stream:
+                </Text>
+                <Text fontSize="$lg">
+                    {errMsg}
+                </Text>
+            </>
+        )
+    }
     const Loading = (
         <Box
             p="$8"
@@ -153,6 +195,7 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
+                    refetchStreams={refetch}
                 />
             ))}
         </>
@@ -168,6 +211,7 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
+                    refetchStreams={refetch}
                 />
             ))}
         </>
@@ -280,11 +324,40 @@ export function StreamList({chainName}: StreamsProps) {
         />
     );
 
+    const faucet = (
+        <Box mb="$8" display="flex" alignItems="center" justifyContent="center">
+            <Text fontSize="$lg">
+                <strong>
+                    Get TestNet FUND from the <Link href={"https://faucet-testnet.unification.io"} target={"_blank"} underline={true}>Faucet</Link>
+                </strong>
+            </Text>
+        </Box>
+    )
+
     return (
         <Box mb="$20" position="relative">
             {address ? Loading : null}
 
+            {chainName === 'unificationtestnet' ? faucet : null}
+
             {address ? content : connect}
+
+            <BasicModal
+                title={
+                    <Box maxWidth="40rem">
+                        <Text fontSize="$xl" fontWeight="$bold">Create Stream</Text>
+                    </Box>
+                }
+                isOpen={statusModal.open}
+                onOpen={openStatusModal}
+                onClose={closeStatusModal}
+            >
+
+                <Box position="relative" maxWidth={"$containerSm"}>
+                    { modalContent }
+                </Box>
+
+            </BasicModal>
 
         </Box>
     );
