@@ -74,8 +74,12 @@ export function Stream({
         const interval = setInterval(() => {
             const timeSince = Date.now() - streamData.lastOutflowTime.getTime()
             const flowMs = parseInt(streamData.flowRate.toString(), 10) / 1000
-            const claimable = flowMs * timeSince
-            const remaining = parseInt(streamData.deposit.amount.toString(), 10) - claimable
+            let claimable = flowMs * timeSince
+            const remainingDeposit = parseInt(streamData.deposit.amount.toString(), 10)
+            if(claimable > remainingDeposit) {
+                claimable = remainingDeposit
+            }
+            const remaining = remainingDeposit - claimable
             // ToDo - get validator fee from on-chain params
             const valFee = claimable * 0.01
 
