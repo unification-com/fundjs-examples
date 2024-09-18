@@ -66,7 +66,6 @@ export function Stream({
     })
 
     const explorer = getExplorer(chainName)
-
     useEffect(() => {
         const interval = setInterval(() => {
             const timeSince = Date.now() - streamData.lastOutflowTime.getTime()

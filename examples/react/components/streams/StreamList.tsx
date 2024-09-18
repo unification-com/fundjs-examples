@@ -171,7 +171,6 @@ export function StreamList({chainName}: StreamsProps) {
             </>
         )
     }
-
     const Loading = (
         <Box
             p="$8"

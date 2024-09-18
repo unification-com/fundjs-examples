@@ -55,8 +55,6 @@ export function useCreateStream(chainName: string) {
                 toast.success('Create Stream successful');
             }
         } catch (e) {
-            // @ts-ignore
-            error(e.error);
             console.error(e);
             toast.error('Create Stream failed');
         } finally {

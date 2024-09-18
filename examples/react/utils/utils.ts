@@ -44,7 +44,6 @@ export const getExplorer = (chainName: string) => {
     const explorerList = getExplorerList(chainName);
     return explorerList.length > 0 ? explorerList[0] : {};
 };
-
 export const getCoin = (chainName: string) => {
     const chainAssets = getChainAssets(chainName);
     return chainAssets.assets[0] as Asset;
