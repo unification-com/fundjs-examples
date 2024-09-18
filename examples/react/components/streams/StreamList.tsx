@@ -7,13 +7,14 @@ import {
     Text, toast,
     useColorModeValue,
 } from "@interchain-ui/react";
-import {useModal, usePaymentStreamData} from "@/hooks";
+import {useModal, usePaymentStreamData, useQueryBalance} from "@/hooks";
 import {exponentiate, getCoin, getExponent, getExplorer} from "@/utils";
 import {Stream} from "@/components/streams/Stream";
 import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
 import {useEffect, useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
 import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+import {CHAIN_NAME_STORAGE_KEY} from "@/components";
 
 export type StreamsProps = {
     chainName: string;
@@ -21,12 +22,15 @@ export type StreamsProps = {
 
 export function StreamList({chainName}: StreamsProps) {
     const {address} = useChain(chainName);
-    const {data, isLoading, refetch} = usePaymentStreamData(chainName);
+    const {data: streamData, isLoading: isLoadingStreamData, refetch: refetchStreamData} = usePaymentStreamData(chainName);
+    const {data: balanceData, isLoading: isLoadingBalanceData, refetch: refetchBalanceData} = useQueryBalance(chainName, "nund");
+
     const {isCalculating, onCalculateFlowRate} = useCalculateFlowRate(chainName);
     const {isCreating, onCreateStream} = useCreateStream(chainName)
     const [isCalculated, setIsCalculated] = useState(false)
     const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
     const [ modalContent, setModalContent ] = useState(<></>)
+    const [currentAddress, setCurrentAddress] = useState<string>("")
 
     const [initStreamFormData, setInitStreamFormData] = useState({
         fund: 100,
@@ -42,13 +46,22 @@ export function StreamList({chainName}: StreamsProps) {
         depositEndTime: 0,
     })
 
-    useEffect(() => {
-        refetch()
-    }, [address]);
-
     const coin = getCoin(chainName);
     const exponent = getExponent(chainName);
     const explorer = getExplorer(chainName)
+
+    useEffect(() => {
+        if (address && address !== currentAddress) {
+            setCurrentAddress(address);
+            refetchStreamData()
+            refetchBalanceData()
+        }
+    }, [address]);
+
+    function handleClickRefreshButton() {
+        refetchStreamData()
+        refetchBalanceData()
+    }
 
     function handleCreateNewStreamSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
@@ -155,7 +168,7 @@ export function StreamList({chainName}: StreamsProps) {
                 </Text>
             </>
         )
-        refetch()
+        refetchStreamData()
     }
 
     function onCreateNewStreamError(errMsg: string) {
@@ -176,7 +189,7 @@ export function StreamList({chainName}: StreamsProps) {
             p="$8"
             borderRadius="$md"
             justifyContent="center"
-            display={isLoading ? "flex" : "none"}
+            display={"flex"}
         >
             <Spinner
                 size="$5xl"
@@ -188,14 +201,19 @@ export function StreamList({chainName}: StreamsProps) {
     const asSenderStreams = (
         <>
             <h2>Streams as Sender</h2>
-            {data.streamsAsSender?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            <button onClick={handleClickRefreshButton}>Refresh</button>
+            {isLoadingStreamData ? Loading : streamData.streamsAsSender?.map((streamRes: {
+                sender: string;
+                receiver: string;
+                stream: StreamType;
+            }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    refetchStreams={refetch}
+                    refetchStreams={refetchStreamData}
                 />
             ))}
         </>
@@ -204,17 +222,25 @@ export function StreamList({chainName}: StreamsProps) {
     const asReceiverStreams = (
         <>
             <h2>Streams as Receiver</h2>
-            {data.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            <button onClick={handleClickRefreshButton}>Refresh</button>
+            {isLoadingStreamData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    refetchStreams={refetch}
+                    refetchStreams={refetchStreamData}
                 />
             ))}
         </>
+    )
+
+    // @ts-ignore
+    const balance = (
+        isLoadingBalanceData ? null : <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
+           Balance: {new Intl.NumberFormat('en-GB').format( exponentiate(balanceData?.balance?.amount, -exponent))} FUND
+        </Text>
     )
 
     const createNewStreamContent = (
@@ -336,9 +362,9 @@ export function StreamList({chainName}: StreamsProps) {
 
     return (
         <Box mb="$20" position="relative">
-            {address ? Loading : null}
-
             {chainName === 'unificationtestnet' ? faucet : null}
+
+            {address ? balance : null }
 
             {address ? content : connect}
 
