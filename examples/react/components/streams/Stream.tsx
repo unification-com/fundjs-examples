@@ -39,6 +39,8 @@ export function Stream({
 
     const { address } = useChain(chainName);
     const [claimable, setClaimable] = useState(0);
+    const [actualReceive, setActualReceive] = useState(0);
+    const [validatorFee, setValidatorFee] = useState(0);
     const [remainingDeposit, setRemainingDeposit] = useState(0);
     const [isSender, setIsSender] = useState(address === sender);
     const { onClaimStream} = useClaimStream(chainName)
@@ -74,8 +76,12 @@ export function Stream({
             const flowMs = parseInt(streamData.flowRate.toString(), 10) / 1000
             const claimable = flowMs * timeSince
             const remaining = parseInt(streamData.deposit.amount.toString(), 10) - claimable
+            // ToDo - get validator fee from on-chain params
+            const valFee = claimable * 0.01
 
             setClaimable(claimable)
+            setValidatorFee(valFee)
+            setActualReceive(claimable - valFee)
             setRemainingDeposit(remaining > 0 ? remaining : 0)
         }, 100);
         return () => {
@@ -85,11 +91,24 @@ export function Stream({
 
     function handleClaimSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
-        setModalContent(<Text fontSize="$lg">
-            <Spinner
-                size="$5xl"
-            /> Sending transaction
-        </Text>)
+        setModalContent(
+            <>
+                <Text fontSize="$lg">
+                    Claiming {exponentiate(claimable, -exponent).toFixed(9)} {chainCoin.symbol}
+                </Text>
+                <Text fontSize="$lg">
+                    {exponentiate(validatorFee, -exponent).toFixed(9)} {chainCoin.symbol} will go to Validators
+                </Text>
+                <Text fontSize="$lg">
+                    You will receive {exponentiate(actualReceive, -exponent).toFixed(9)} {chainCoin.symbol}
+                </Text>
+                <Text fontSize="$lg">
+                    <Spinner
+                        size="$5xl"
+                    /> Sending transaction
+                </Text>
+            </>
+            )
         openStatusModal();
         onClaimStream({
             sender,
