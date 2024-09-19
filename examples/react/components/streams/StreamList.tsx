@@ -57,13 +57,7 @@ export function StreamList({chainName}: StreamsProps) {
             refetchBalanceData()
             refetchParamsData()
         }
-        if(streamData.streamsAsSender === undefined) {
-            refetchStreamData()
-            refetchBalanceData()
-            refetchParamsData()
-        }
-
-    }, [address, streamData]);
+    }, [address]);
 
     function handleClickRefreshButton(e: { preventDefault: () => void; }) {
         e.preventDefault();
