@@ -6,29 +6,26 @@ import { useQueryHooks } from '.';
     return this.toString();
 };
 
-export function useQueryBalance(chainName: string, denom: string) {
+export function useQueryStreamParams(chainName: string) {
     const [isLoading, setIsLoading] = useState(false);
     const { address } = useChain(chainName);
-    const { cosmos, isReady, isFetching } = useQueryHooks(chainName);
+    const { mainchain, isReady, isFetching } = useQueryHooks(chainName);
 
-    const balanceQuery = cosmos.bank.v1beta1.useBalance({
-        request: {
-            address: (address) ? address : '',
-            denom
-        },
+    const paramsQuery = mainchain.stream.v1.useParams({
+        request: {},
         options: {
             enabled: isReady,
             staleTime: Infinity,
-            select: ({balance}) => balance,
+            select: ({params}) => params,
         },
     })
 
     const singleQueries = {
-        balance: balanceQuery,
+        params: paramsQuery,
     };
 
     const staticQueries = [
-        singleQueries.balance,
+        singleQueries.params,
     ];
 
     useEffect(() => {
@@ -56,15 +53,15 @@ export function useQueryBalance(chainName: string, denom: string) {
     };
 
     const singleQueriesData = useMemo(() => {
-        if (isStaticQueriesFetching || !isReady || !address) return;
+        if (isStaticQueriesFetching || !isReady) return;
 
         return Object.fromEntries(
             Object.entries(singleQueries).map(([key, query]) => [key, query.data])
         ) as SingleQueriesData;
-    }, [isStaticQueriesFetching, isReady, address]);
+    }, [isStaticQueriesFetching, isReady]);
 
     const refetch = () => {
-        balanceQuery.refetch();
+        paramsQuery.refetch();
     };
 
     return { data: { ...singleQueriesData }, isLoading, refetch };

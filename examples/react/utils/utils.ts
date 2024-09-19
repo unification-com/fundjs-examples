@@ -74,3 +74,14 @@ export function parseQuorum(value?: Uint8Array) {
     const quorum = decodeUint8Array(value);
     return new BigNumber(quorum).shiftedBy(-quorum.length).toNumber();
 }
+
+export function parseStreamError(value: string) {
+    if(value.includes("stream exists")) {
+        return "Stream from this sender to receiver already exists. Use the update stream function if you wish to modify it"
+    }
+    if(value.includes("receiver cannot be same as sender")) {
+        return "Receiver address cannot be same as sender address";
+    }
+
+    return value
+}

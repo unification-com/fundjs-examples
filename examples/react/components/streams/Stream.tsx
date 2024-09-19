@@ -1,7 +1,7 @@
 import {
     BasicModal,
     Box,
-    Button, Link, Spinner,
+    Button, Link, Spinner, Stack,
     Text,
 } from "@interchain-ui/react";
 
@@ -24,6 +24,8 @@ export type StreamProps = {
     sender: string;
     receiver: string;
     chainName: string;
+    validatorFeePerc: number;
+    walletBalance: number;
     refetchStreams?: () => void
     refetchBalanceData?: () => void
 };
@@ -33,6 +35,8 @@ export function Stream({
                            sender,
                            receiver,
                            chainName,
+                           validatorFeePerc,
+                           walletBalance,
                            refetchStreams = () => {},
                            refetchBalanceData = () => {},
                        }: StreamProps) {
@@ -80,8 +84,7 @@ export function Stream({
                 claimable = remainingDeposit
             }
             const remaining = remainingDeposit - claimable
-            // ToDo - get validator fee from on-chain params
-            const valFee = claimable * 0.01
+            const valFee = claimable * validatorFeePerc
 
             setClaimable(claimable)
             setValidatorFee(valFee)
@@ -97,14 +100,19 @@ export function Stream({
         e.preventDefault();
         setModalContent(
             <>
+                <Text fontSize="$lg" fontWeight={"$bold"}>
+                    Approx. Total Claim: {exponentiate(claimable, -exponent).toFixed(9)} {chainCoin.symbol}
+                </Text>
+
+                <Text fontSize="$sm">
+                    Note - actual amount is calculated on-chain at the block time the transaction is processed
+                </Text>
+
                 <Text fontSize="$lg">
-                    Claiming {exponentiate(claimable, -exponent).toFixed(9)} {chainCoin.symbol}
+                    <strong>You will receive approx.:</strong> {exponentiate(actualReceive, -exponent).toFixed(3)} {chainCoin.symbol}
                 </Text>
                 <Text fontSize="$lg">
-                    {exponentiate(validatorFee, -exponent).toFixed(9)} {chainCoin.symbol} will go to Validators
-                </Text>
-                <Text fontSize="$lg">
-                    You will receive {exponentiate(actualReceive, -exponent).toFixed(9)} {chainCoin.symbol}
+                    <strong>{validatorFeePerc * 100}% Validator Fee approx.:</strong> {exponentiate(validatorFee, -exponent).toFixed(3)} {chainCoin.symbol}
                 </Text>
                 <Text fontSize="$lg">
                     <Spinner
@@ -172,6 +180,13 @@ export function Stream({
         openStatusModal();
         closeTopupDepositModal()
         const nund = exponentiate(topUpFormData.deposit, exponent)
+
+
+        if(nund > walletBalance) {
+            onSendTxError("Cannot deposit more than balance")
+            return
+        }
+
         onTopUpDeposit({
             receiver,
             deposit: nund,
@@ -313,116 +328,136 @@ export function Stream({
     const exponent = getExponent(chainName);
 
     const claim = (
-        <form onSubmit={handleClaimSubmit}>
-            <button type="submit">Claim</button>
-        </form>
+        <Button intent="primary" size={"sm"} onClick={handleClaimSubmit}>
+            Claim
+        </Button>
     )
 
     const editButtons = (
-        <Box mt="$8" width="100%" display="flex">
-            <Button intent="secondary" variant="ghost" size={"sm"} onClick={openTopupDepositModal}>
+
+        <Stack
+            direction="vertical"
+            space="$6"
+        >
+            <Button intent="tertiary" size={"sm"} onClick={openTopupDepositModal}>
                 Top Up Deposit
             </Button>
-            <Button intent="secondary" variant="ghost" size={"sm"} onClick={openUpdateFlowRateModal}>
+            <Button intent="tertiary" size={"sm"} onClick={openUpdateFlowRateModal}>
                 Update Flow Rate
             </Button>
-            <Button intent="secondary" variant="ghost" size={"sm"} onClick={openCancelStreamModal}>
+            <Button intent="danger" size={"sm"} onClick={openCancelStreamModal}>
                 Cancel Stream
             </Button>
-        </Box>
+        </Stack>
+    )
+
+    const accExplorerLink = (
+        isSender ?
+           ( explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", receiver)} target={"_blank"}>{receiver}</Link> : receiver)
+            :
+           ( explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", sender)} target={"_blank"}>{sender}</Link> : sender)
     )
 
     return (
-        <Box mt="$8" width="70%" display="table">
-            <Box mt="$8" display="table-row">
-                <Box mt="$8" display="table-cell" width={4}>
-                    <Text
-                        color="$textSecondary"
-                        fontSize="$sm"
-                        fontWeight="$semibold"
-                    >
-                        Receiver
-                    </Text>
-                </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text
-                        color="$textSecondary"
-                        fontSize="$sm"
-                        fontWeight="$semibold"
-                    >
-                        {receiver}
-                    </Text>
-                </Box>
-            </Box>
+        <Box mt="$8" width="70%" display="table" borderRadius="$lg" backgroundColor="$cardBg" px="$4"
+             py="$4">
+
             <Box mt="$8" display="table-row">
                 <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        Flow Rate:
-                    </Text>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell" width={4}>
+                            <Text
+                                fontSize="$sm"
+                                fontWeight="$bold"
+                            >
+                                {isSender ? "To" : "From"}:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text
+                                fontSize="$sm"
+                                fontWeight="$bold"
+                            >
+                                {accExplorerLink}
+                            </Text>
+                        </Box>
+                    </Box>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                Flow Rate:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                {exponentiate(streamData.flowRate?.toString(), -exponent).toFixed(9)} {chainCoin.symbol} / sec
+                            </Text>
+                        </Box>
+                    </Box>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                Deposit:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                {exponentiate(streamData.deposit.amount.toString(), -exponent).toFixed(9)} {chainCoin.symbol}
+                            </Text>
+                        </Box>
+                    </Box>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                Deposit Zero Time:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                {streamData.depositZeroTime.toLocaleString()}
+                            </Text>
+                        </Box>
+                    </Box>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                Last Claim Time:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                {streamData.lastOutflowTime.toLocaleString()}
+                            </Text>
+                        </Box>
+                    </Box>
+                    <Box mt="$8" display="table-row">
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                Claimable:
+                            </Text>
+                        </Box>
+                        <Box mt="$8" display="table-cell">
+                            <Text fontSize="$sm" fontWeight="$bold">
+                                {exponentiate(claimable, -exponent).toFixed(9)} {chainCoin.symbol}
+                            </Text>
+                        </Box>
+                    </Box>
                 </Box>
+
                 <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        {exponentiate(streamData.flowRate?.toString(), -exponent).toFixed(9)} {chainCoin.symbol} / sec
-                    </Text>
+                    <Box mt="$8" display="table-cell">
+                        <Text fontSize="$sm" fontWeight="$bold">
+                            { isSender ? editButtons : claim}
+                        </Text>
+                    </Box>
                 </Box>
             </Box>
-            <Box mt="$8" display="table-row">
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        Deposit:
-                    </Text>
-                </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        {exponentiate(streamData.deposit.amount.toString(), -exponent).toFixed(9)} {chainCoin.symbol}
-                    </Text>
-                </Box>
-            </Box>
-            <Box mt="$8" display="table-row">
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        Deposit Zero Time:
-                    </Text>
-                </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        {streamData.depositZeroTime.toLocaleString()}
-                    </Text>
-                </Box>
-            </Box>
-            <Box mt="$8" display="table-row">
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        Last Claim Time:
-                    </Text>
-                </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        {streamData.lastOutflowTime.toLocaleString()}
-                    </Text>
-                </Box>
-            </Box>
-            <Box mt="$8" display="table-row">
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        Claimable:
-                    </Text>
-                </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        {exponentiate(claimable, -exponent).toFixed(9)} {chainCoin.symbol}
-                    </Text>
-                </Box>
-            </Box>
+
             <Box mt="$8" display="table-row">
                 <Box mt="$8" display="table-cell">
 
                 </Box>
-                <Box mt="$8" display="table-cell">
-                    <Text fontSize="$sm" fontWeight="$bold">
-                        { isSender ? editButtons : claim}
-                    </Text>
-                </Box>
+
             </Box>
 
             <BasicModal
