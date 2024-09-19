@@ -71,12 +71,12 @@ export function usePaymentStreamData(chainName: string) {
     };
 
     const singleQueriesData = useMemo(() => {
-        if (isStaticQueriesFetching || !isReady) return;
+        if (isStaticQueriesFetching || !isReady || !address) return;
 
         return Object.fromEntries(
             Object.entries(singleQueries).map(([key, query]) => [key, query.data])
         ) as SingleQueriesData;
-    }, [isStaticQueriesFetching, isReady]);
+    }, [isStaticQueriesFetching, isReady, address]);
 
     const refetch = () => {
         paymentStreamsQueryAsSender.refetch();

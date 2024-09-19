@@ -4,7 +4,7 @@ import { toast } from '@interchain-ui/react';
 import { useChain } from '@cosmos-kit/react';
 import { coins, StdFee, coin } from '@cosmjs/stargate';
 import { useTx } from '@/hooks';
-import { getCoin } from '@/utils';
+import {getCoin, parseStreamError} from '@/utils';
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
 
@@ -42,13 +42,10 @@ export function useCreateStream(chainName: string) {
             setIsCreating(true);
             const res = await tx([msg], { fee });
             if (res.error) {
-                let errMsg: string = res.errorMsg;
-                if(res.errorMsg.includes("stream exists")) {
-                    errMsg = "Stream from this sender to receiver already exists. Use the update stream function if you wish to modify it"
-                }
+                let errMsg: string = parseStreamError(res.errorMsg);
                 error(errMsg);
                 console.error(res.error);
-                toast.error(res.errorMsg);
+                toast.error(errMsg);
             } else {
                 const txHash = res?.response?.transactionHash
                 success(txHash);
