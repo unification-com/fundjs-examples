@@ -1,7 +1,7 @@
 import {useChain} from "@cosmos-kit/react";
 import {
     BasicModal,
-    Box, Link,
+    Box, Button, Link,
     Spinner,
     Tabs,
     Text, toast,
@@ -14,7 +14,7 @@ import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
 import {useEffect, useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
 import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
-import {CHAIN_NAME_STORAGE_KEY} from "@/components";
+import {useQueryStreamParams} from "@/hooks/useQueryStreamParams";
 
 export type StreamsProps = {
     chainName: string;
@@ -24,7 +24,7 @@ export function StreamList({chainName}: StreamsProps) {
     const {address} = useChain(chainName);
     const {data: streamData, isLoading: isLoadingStreamData, refetch: refetchStreamData} = usePaymentStreamData(chainName);
     const {data: balanceData, isLoading: isLoadingBalanceData, refetch: refetchBalanceData} = useQueryBalance(chainName, "nund");
-
+    const {data: paramsData, isLoading: isLoadingParamsData, refetch: refetchParamsData} = useQueryStreamParams(chainName);
     const {isCalculating, onCalculateFlowRate} = useCalculateFlowRate(chainName);
     const {isCreating, onCreateStream} = useCreateStream(chainName)
     const [isCalculated, setIsCalculated] = useState(false)
@@ -55,12 +55,21 @@ export function StreamList({chainName}: StreamsProps) {
             setCurrentAddress(address);
             refetchStreamData()
             refetchBalanceData()
+            refetchParamsData()
         }
-    }, [address]);
+        if(streamData.streamsAsSender === undefined) {
+            refetchStreamData()
+            refetchBalanceData()
+            refetchParamsData()
+        }
 
-    function handleClickRefreshButton() {
+    }, [address, streamData]);
+
+    function handleClickRefreshButton(e: { preventDefault: () => void; }) {
+        e.preventDefault();
         refetchStreamData()
         refetchBalanceData()
+        refetchParamsData()
     }
 
     function handleCreateNewStreamSubmit(e: { preventDefault: () => void; }) {
@@ -72,6 +81,12 @@ export function StreamList({chainName}: StreamsProps) {
         </Text>)
         openStatusModal();
         const nund = exponentiate(newStreamFormData.deposit, exponent)
+
+        if(nund > parseInt(balanceData.balance.amount, 10)) {
+            onCreateNewStreamError("Cannot deposit more than balance")
+            return
+        }
+
         onCreateStream({
             receiver: newStreamFormData.receiver,
             deposit: nund,
@@ -201,9 +216,13 @@ export function StreamList({chainName}: StreamsProps) {
 
     const asSenderStreams = (
         <>
-            <h2>Streams as Sender</h2>
-            <button onClick={handleClickRefreshButton}>Refresh</button>
-            {isLoadingStreamData ? Loading : streamData.streamsAsSender?.map((streamRes: {
+            <h2>
+                Streams as Sender
+            </h2>
+            <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
+
+            <Box display={"block"} alignItems={"center"} width={"100%"}>
+            {isLoadingStreamData || isLoadingParamsData || isLoadingBalanceData ? Loading : streamData.streamsAsSender?.map((streamRes: {
                 sender: string;
                 receiver: string;
                 stream: StreamType;
@@ -214,28 +233,35 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
+                    validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
+                    walletBalance={parseInt(balanceData.balance.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
             ))}
+            </Box>
         </>
     )
 
     const asReceiverStreams = (
         <>
             <h2>Streams as Receiver</h2>
-            <button onClick={handleClickRefreshButton}>Refresh</button>
-            {isLoadingStreamData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
+            <Box display={"block"} alignItems={"center"} width={"100%"}>
+            {isLoadingStreamData || isLoadingParamsData || isLoadingBalanceData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
+                    validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
+                    walletBalance={parseInt(balanceData.balance.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
             ))}
+            </Box>
         </>
     )
 
@@ -343,11 +369,11 @@ export function StreamList({chainName}: StreamsProps) {
                 },
                 {
                     content: asSenderStreams,
-                    label: 'As Sender'
+                    label: `As Sender (${isLoadingStreamData ? 0 : streamData.streamsAsSender?.length})`
                 },
                 {
                     content: asReceiverStreams,
-                    label: 'As Receiver'
+                    label: `As Receiver (${isLoadingStreamData ? 0 : streamData.streamsAsReceiver?.length})`
                 }
             ]}
         />
