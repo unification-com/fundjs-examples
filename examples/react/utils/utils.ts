@@ -44,6 +44,29 @@ export const getExplorer = (chainName: string) => {
     const explorerList = getExplorerList(chainName);
     return explorerList.length > 0 ? explorerList[0] : {};
 };
+
+export const getRpcList = (chainName: string) => {
+    const chainInfo = getChainInfo(chainName);
+    // @ts-ignore
+    return chainInfo.apis.rpc ? chainInfo.apis.rpc : [];
+};
+
+export const getRpc = (chainName: string) => {
+    const rpcList = getRpcList(chainName);
+    return rpcList.length > 0 ? rpcList[0].address : "";
+};
+
+export const getWebsocketList = (chainName: string) => {
+    const chainInfo = getChainInfo(chainName);
+    // @ts-ignore
+    return chainInfo.apis.wss ? chainInfo.apis.wss : [];
+};
+
+export const getWebsocket = (chainName: string) => {
+    const wsList = getWebsocketList(chainName);
+    return wsList.length > 0 ? wsList[0].address : "";
+};
+
 export const getCoin = (chainName: string) => {
     const chainAssets = getChainAssets(chainName);
     return chainAssets.assets[0] as Asset;
@@ -84,4 +107,19 @@ export function parseStreamError(value: string) {
     }
 
     return value
+}
+
+export function truncateAddress(fullStr: string, strLen: number, separator: string) {
+    if (fullStr.length <= strLen) return fullStr;
+
+    separator = separator || '...';
+
+    var sepLen = separator.length,
+        charsToShow = strLen - sepLen,
+        frontChars = Math.ceil(charsToShow/2),
+        backChars = Math.floor(charsToShow/2);
+
+    return fullStr.substr(0, frontChars) +
+        separator +
+        fullStr.substr(fullStr.length - backChars);
 }

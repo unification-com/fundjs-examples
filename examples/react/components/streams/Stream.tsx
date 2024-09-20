@@ -47,6 +47,7 @@ export function Stream({
     const [validatorFee, setValidatorFee] = useState(0);
     const [remainingDeposit, setRemainingDeposit] = useState(0);
     const [isSender, setIsSender] = useState(address === sender);
+    const [showTopUpInfo, setShowTopUpInfo] = useState(false);
     const { onClaimStream} = useClaimStream(chainName)
     const { onTopUpDeposit } = useTopUpDeposit(chainName)
     const { isCalculating, onCalculateFlowRate } = useCalculateFlowRate(chainName);
@@ -76,7 +77,8 @@ export function Stream({
     const explorer = getExplorer(chainName)
     useEffect(() => {
         const interval = setInterval(() => {
-            const timeSince = Date.now() - streamData.lastOutflowTime.getTime()
+            const now = Date.now()
+            const timeSince = now - streamData.lastOutflowTime.getTime()
             const flowMs = parseInt(streamData.flowRate.toString(), 10) / 1000
             let claimable = flowMs * timeSince
             const remainingDeposit = parseInt(streamData.deposit.amount.toString(), 10)
@@ -85,6 +87,11 @@ export function Stream({
             }
             const remaining = remainingDeposit - claimable
             const valFee = claimable * validatorFeePerc
+
+            setShowTopUpInfo(false)
+            if(now > streamData.depositZeroTime.getTime() && claimable > 0) {
+                setShowTopUpInfo(true)
+            }
 
             setClaimable(claimable)
             setValidatorFee(valFee)
@@ -477,6 +484,16 @@ export function Stream({
                         <input type="text" name="deposit" size={3} value={topUpFormData.deposit}
                                onChange={handleTopupDepositInputChange}/> {chainCoin.symbol}
                     </label>
+                    {
+                        showTopUpInfo ?
+                            <Box position="relative" maxWidth={"$containerSm"}>
+                            <Text fontSize="$sm">
+                                Note: the &quot;deposit zero time&quot; has passed. Any remaining unclaimed funds will<br />
+                                be automatically forwarded to the receiver wallet as part of this Top Up transaction.
+                            </Text>
+                            </Box>
+                            : null
+                    }
                     <br/>
                     <button type="submit">Top Up</button>
                 </form>

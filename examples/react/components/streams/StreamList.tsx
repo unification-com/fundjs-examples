@@ -210,9 +210,9 @@ export function StreamList({chainName}: StreamsProps) {
 
     const asSenderStreams = (
         <>
-            <h2>
+            <Text fontSize={"$xl"} fontWeight={"$bold"}>
                 Streams as Sender
-            </h2>
+            </Text>
             <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
 
             <Box display={"block"} alignItems={"center"} width={"100%"}>
@@ -239,7 +239,9 @@ export function StreamList({chainName}: StreamsProps) {
 
     const asReceiverStreams = (
         <>
-            <h2>Streams as Receiver</h2>
+            <Text fontSize={"$xl"} fontWeight={"$bold"}>
+                Streams as Receiver
+            </Text>
             <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
             {isLoadingStreamData || isLoadingParamsData || isLoadingBalanceData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
