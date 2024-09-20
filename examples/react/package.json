@@ -31,7 +31,9 @@
     "react-dom": "^18.2.0",
     "react-icons": "4.6.0",
     "react-markdown": "9.0.1",
-    "react-minimal-pie-chart": "^8.4.0"
+    "react-minimal-pie-chart": "^8.4.0",
+    "react-use-websocket": "^4.8.1",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "4.32.0",

@@ -52,7 +52,7 @@ export function useTx(chainName: string) {
 
     try {
       const txRaw = cosmos.tx.v1beta1.TxRaw;
-      const fee = await estimateFee(msgs, undefined, undefined, 1.5);
+      const fee = await estimateFee(msgs, undefined, undefined, 2.0);
       const client = await getSigningStargateClient();
 
       const signed = await client.sign(address, msgs, fee, '');
