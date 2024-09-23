@@ -303,12 +303,12 @@ export function StreamList({chainName}: StreamsProps) {
 
                             <select value={initStreamFormData.period} onChange={handleInitNewStreamInputChange}
                                     name="period">
-                                <option value="2">Minute</option>
-                                <option value="3">Hour</option>
-                                <option value="4">Day</option>
-                                <option value="5">Week</option>
-                                <option value="6">Month</option>
-                                <option value="7">Year</option>
+                                <option value="2">Minute{initStreamFormData.duration > 1 ? 's' : null}</option>
+                                <option value="3">Hour{initStreamFormData.duration > 1 ? 's' : null}</option>
+                                <option value="4">Day{initStreamFormData.duration > 1 ? 's' : null}</option>
+                                <option value="5">Week{initStreamFormData.duration > 1 ? 's' : null}</option>
+                                <option value="6">Month{initStreamFormData.duration > 1 ? 's' : null}</option>
+                                <option value="7">Year{initStreamFormData.duration > 1 ? 's' : null}</option>
                             </select>
                         </Text>
                         <Text>
