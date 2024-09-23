@@ -283,7 +283,7 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
+                    validatorFeePerc={parseFloat(paramsData?.params?.validatorFee)}
                     walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
@@ -312,7 +312,7 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
+                    validatorFeePerc={parseFloat(paramsData?.params?.validatorFee)}
                     walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
