@@ -2,9 +2,10 @@ import React, { useState, useCallback, useEffect } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 // @ts-ignore
 import { v4 as uuidv4 } from 'uuid';
-import { truncateAddress, getExplorer } from '@/utils'
+import {truncateAddress, getExplorer, exponentiate, getCoin, getExponent} from '@/utils'
 import {Box, Text, Stack, ListItem, Link} from "@interchain-ui/react";
 import {useChain} from "@cosmos-kit/react";
+import {parseCoins} from "@cosmjs/stargate";
 
 export type WebSocketProps = {
     chainName: string;
@@ -40,26 +41,31 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
     }, [address]);
 
     const explorer = getExplorer(chainName)
+    const chainCoin = getCoin(chainName);
+    const exponent = getExponent(chainName);
 
     const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, { share: true });
 
     function formatExplorerUrl(value: string, what: string, truncate: boolean): React.JSX.Element {
         let url = ''
+        let len = 20
         switch(what) {
             case "account":
                 if(explorer.account_page !== undefined && value != null) {
                     url = explorer.account_page.replace("${accountAddress}", value)
                 }
+                len = 20
                 break
             case "tx":
                 if(explorer.tx_page !== undefined && value != null) {
                     url = explorer.tx_page.replace("${txHash}", value)
                 }
+                len = 12
                 break
         }
 
         if(url !== '') {
-            return <Link href={url} target={"_blank"}>{truncate? truncateAddress(value) : value}</Link>
+            return <Link href={url} target={"_blank"}>{truncate? truncateAddress(value, len) : value}</Link>
         }
         return <>{value}</>
     }
@@ -86,9 +92,10 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
     function parseStreamDeposit(attributes: any[], txHash: string): React.JSX.Element {
         const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
-        const amount = getAttr(attributes, "amount_deposited")
+        const amount = parseCoins(getAttr(attributes, "amount_deposited"))
+        const amountFund = exponentiate(amount[0].amount, -exponent).toFixed(3)
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Top Up deposit: {sender} -&gt; {receiver}: {amount}</>
+        return <>Tx {txHashLink} - Top Up deposit: {sender} -&gt; {receiver}: {amountFund} {chainCoin.symbol}</>
     }
 
     function parseCreateStream(attributes: any[], txHash: string): React.JSX.Element {
@@ -96,31 +103,38 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const flowRate = getAttr(attributes, "flow_rate")
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Create Stream: {sender} -&gt; {receiver}: {flowRate} nund/sec</>
+        const flowRateFund = exponentiate(flowRate, -exponent).toFixed(9)
+        return <>Tx {txHashLink} - Create Stream: {sender} -&gt; {receiver}: {flowRateFund} {chainCoin.symbol}/sec</>
     }
 
     function parseClaimStream(attributes: any[], txHash: string): React.JSX.Element {
         const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
-        const amount = getAttr(attributes, "claim_total")
+        const amount = parseCoins(getAttr(attributes, "claim_total"))
+        const amountFund = exponentiate(amount[0].amount, -exponent).toFixed(3)
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Claim Stream: {sender} -&gt; {receiver}: {amount}</>
+        return <>Tx {txHashLink} - Claim Stream: {sender} -&gt; {receiver}: {amountFund} {chainCoin.symbol}</>
     }
 
     function parseUpdateFlowRate(attributes: any[], txHash: string): React.JSX.Element {
         const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const oldFlowRate = getAttr(attributes, "old_flow_rate")
+        const oldFlowRateFund = exponentiate(oldFlowRate, -exponent).toFixed(9)
         const newFlowRate = getAttr(attributes, "new_flow_rate")
+        const newFlowRateFund = exponentiate(newFlowRate, -exponent).toFixed(9)
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Update Flow Rate: {sender} -&gt; {receiver} from {oldFlowRate} to {newFlowRate} nund/sec</>
+        return <>Tx {txHashLink} - Update Flow Rate: {sender} -&gt; {receiver} from {oldFlowRateFund} to {newFlowRateFund} {chainCoin.symbol}/sec</>
     }
 
     function parseCancelStream(attributes: any[], txHash: string): React.JSX.Element {
         const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Stream Cancelled: {sender} -&gt; {receiver}</>
+        const amountRefunded = parseCoins(getAttr(attributes, "refund_amount"))
+        const amountRefundedFund = exponentiate(amountRefunded[0].amount, -exponent).toFixed(3)
+
+        return <>Tx {txHashLink} - Stream Cancelled: {sender} -&gt; {receiver}. Refunded {amountRefundedFund} {chainCoin.symbol}</>
     }
 
     function parseEvent(e: any, txHash: string):React.JSX.Element | null {
@@ -187,7 +201,7 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
             <Text>The WebSocket is currently {connectionStatus}</Text>
             <Stack as="ul" space="1" direction="vertical">
                 {messageHistory.map((message, idx) => (
-                    <ListItem key={`ws_event${idx}`}>- {message ? message : null}</ListItem>
+                    <ListItem key={`ws_event${idx}`} size={"sm"}>- {message ? message : null}</ListItem>
                 ))}
             </Stack>
         </Box>
