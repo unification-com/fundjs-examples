@@ -11,7 +11,7 @@ export type WebSocketProps = {
 };
 
 export const WebSocket = ({chainName}: WebSocketProps) => {
-    const { chain } = useChain(chainName);
+    const { chain, address } = useChain(chainName);
     const [socketUrl, setSocketUrl] = useState('');
     const [messageHistory, setMessageHistory] = useState<string[]>([]);
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -36,12 +36,21 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         return a.value
     }
 
+    function isSenderOrReceiver(attributes: any[]): boolean {
+        const sender = getAttr(attributes, "sender")
+        const receiver = getAttr(attributes, "receiver")
+        return sender === address || receiver === address;
+    }
+
     function parseStreamDeposit(attributes: any[]): string {
         let msg = ''
         const sender = getWalletAddress(attributes, "sender")
         const receiver = getWalletAddress(attributes, "receiver")
         const amount = getAttr(attributes, "amount_deposited")
-        msg = `Top Up deposit: ${sender} -> ${receiver}: ${amount}`
+
+        if(isSenderOrReceiver(attributes)) {
+            msg = `Top Up deposit: ${sender} -> ${receiver}: ${amount}`
+        }
         return msg
     }
 
@@ -50,7 +59,9 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         const sender = getWalletAddress(attributes, "sender")
         const receiver = getWalletAddress(attributes, "receiver")
         const flowRate = getAttr(attributes, "flow_rate")
-        msg = `Create Stream: ${sender} -> ${receiver}: ${flowRate} nund/sec`
+        if(isSenderOrReceiver(attributes)) {
+            msg = `Create Stream: ${sender} -> ${receiver}: ${flowRate} nund/sec`
+        }
         return msg
     }
 
@@ -59,7 +70,9 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         const sender = getWalletAddress(attributes, "sender")
         const receiver = getWalletAddress(attributes, "receiver")
         const amount = getAttr(attributes, "claim_total")
-        msg = `Claim Stream: ${sender} -> ${receiver}: ${amount}`
+        if(isSenderOrReceiver(attributes)) {
+            msg = `Claim Stream: ${sender} -> ${receiver}: ${amount}`
+        }
         return msg
     }
 
@@ -69,7 +82,9 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         const receiver = getWalletAddress(attributes, "receiver")
         const oldFlowRate = getAttr(attributes, "old_flow_rate")
         const newFlowRate = getAttr(attributes, "new_flow_rate")
-        msg = `Update Flow Rate: ${sender} -> ${receiver} from ${oldFlowRate} to ${newFlowRate} nund/sec`
+        if(isSenderOrReceiver(attributes)) {
+            msg = `Update Flow Rate: ${sender} -> ${receiver} from ${oldFlowRate} to ${newFlowRate} nund/sec`
+        }
         return msg
     }
 
@@ -77,7 +92,9 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         let msg = ''
         const sender = getWalletAddress(attributes, "sender")
         const receiver = getWalletAddress(attributes, "receiver")
-        msg = `Stream Cancelled: ${sender} -> ${receiver}`
+        if(isSenderOrReceiver(attributes)) {
+            msg = `Stream Cancelled: ${sender} -> ${receiver}`
+        }
         return msg
     }
 
@@ -137,7 +154,7 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
 
     return (
         <Box borderRadius="$lg" backgroundColor="$cardBg" px="$4" py="$4">
-            <Text fontSize={"$xl"} fontWeight={"$bold"}>Websocket events</Text>
+            <Text fontSize={"$lg"} fontWeight={"$bold"}>Websocket events for {address} Payment Streams</Text>
             <Text>The WebSocket is currently {connectionStatus}</Text>
             <Stack as="ul" space="1" direction="vertical">
                 {messageHistory.map((message, idx) => (

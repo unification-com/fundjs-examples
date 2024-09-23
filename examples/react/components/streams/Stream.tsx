@@ -479,11 +479,11 @@ export function Stream({
             >
                 <form onSubmit={handleTopupDepositSubmit} className={"payment-stream-form"}>
 
-                    <label>
+                    <Text>
                         Deposit:
                         <input type="text" name="deposit" size={3} value={topUpFormData.deposit}
                                onChange={handleTopupDepositInputChange}/> {chainCoin.symbol}
-                    </label>
+                    </Text>
                     {
                         showTopUpInfo ?
                             <Box position="relative" maxWidth={"$containerSm"}>
@@ -511,18 +511,15 @@ export function Stream({
             >
                 <form onSubmit={handleUpdateFlowRateSubmit} className={"payment-stream-form"}>
 
-                    <label>
+                    <Text>
                         Send:
                         <input type="text" name="fund" value={updateFlowFormData.fund}
                                onChange={handleUpdateFlowRateInputChange}/> FUND
-                    </label>
-                    <br/>
-                    <label>
+                    </Text>
+                    <Text>
                         Every
                         <input type="text" size={1} name="duration" value={updateFlowFormData.duration}
                                onChange={handleUpdateFlowRateInputChange}/>
-                    </label>
-                    <label>
                         <select value={updateFlowFormData.period} onChange={handleUpdateFlowRateInputChange}
                                 name="period">
                             <option value="1">Second</option>
@@ -533,9 +530,8 @@ export function Stream({
                             <option value="6">Month</option>
                             <option value="7">Year</option>
                         </select>
-                    </label>
-                    <br />
-                    <button type="submit">Calculate</button>
+                    </Text>
+                    <Button size={"sm"}>Calculate</Button>
                 </form>
             </BasicModal>
 
@@ -559,15 +555,12 @@ export function Stream({
                         Updating the flow rate will also result in approx. {exponentiate(claimable, -exponent).toFixed(3)} {chainCoin.symbol} being
                         sent to the receiver before the new flow rate is applied.
                     </Text>
-
                     <br />
-
-                    <label>
+                    <Text>
                         <strong>New Flow Rate:</strong> {updateFlowFormData.flowRate} nund/sec ({exponentiate(updateFlowFormData.flowRate, -exponent).toFixed(9)} {chainCoin.symbol} / sec)
                         <input type="hidden" name="flowRate" value={updateFlowFormData.flowRate}/> FUND
-                    </label>
-                    <br /><br />
-                    <button type="submit">Send</button>
+                    </Text>
+                    <Button size={"sm"}>Send</Button>
                 </form>
             </BasicModal>
 
@@ -594,8 +587,7 @@ export function Stream({
                         <br />
                         You will be refunded approx. {exponentiate(remainingDeposit, -exponent).toFixed(3)} {chainCoin.symbol}
                     </Text>
-                    <br />
-                    <button type="submit">Cancel Stream</button>
+                    <Button size={"sm"}>Cancel Stream</Button>
                 </form>
             </BasicModal>
 
