@@ -522,7 +522,6 @@ export function Stream({
                                onChange={handleUpdateFlowRateInputChange}/>
                         <select value={updateFlowFormData.period} onChange={handleUpdateFlowRateInputChange}
                                 name="period">
-                            <option value="1">Second</option>
                             <option value="2">Minute</option>
                             <option value="3">Hour</option>
                             <option value="4">Day</option>
