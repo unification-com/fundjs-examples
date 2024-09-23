@@ -36,6 +36,7 @@
     "@cosmjs/stargate": "^0.32.4",
     "@unification-com/fundjs": "^0.0.9",
     "chain-registry": "^1.63.87",
-    "cosmjs-utils": "^0.1.0"
+    "cosmjs-utils": "^0.1.0",
+    "ws": "^8.18.0"
   }
 }
