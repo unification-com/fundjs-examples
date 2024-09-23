@@ -2,8 +2,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 // @ts-ignore
 import { v4 as uuidv4 } from 'uuid';
-import { truncateAddress } from '@/utils'
-import {Box, Text, Stack, ListItem} from "@interchain-ui/react";
+import { truncateAddress, getExplorer } from '@/utils'
+import {Box, Text, Stack, ListItem, Link} from "@interchain-ui/react";
 import {useChain} from "@cosmos-kit/react";
 
 export type WebSocketProps = {
@@ -13,7 +13,7 @@ export type WebSocketProps = {
 export const WebSocket = ({chainName}: WebSocketProps) => {
     const { chain, address } = useChain(chainName);
     const [socketUrl, setSocketUrl] = useState('');
-    const [messageHistory, setMessageHistory] = useState<string[]>([]);
+    const [messageHistory, setMessageHistory] = useState<React.JSX.Element[]>([]);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
@@ -25,15 +25,34 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         }
     }, [chain]);
 
+    const explorer = getExplorer(chainName)
+
     const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, { share: true });
 
-    function getWalletAddress(attributes: any[], which: string): string {
-        return truncateAddress(getAttr(attributes, which), 20, "...")
+    function formatExplorerUrl(value: string, what: string, truncate: boolean): React.JSX.Element {
+        let url = ''
+        switch(what) {
+            case "account":
+                if(explorer.account_page !== undefined && value != null) {
+                    url = explorer.account_page.replace("${accountAddress}", value)
+                }
+                break
+            case "tx":
+                if(explorer.tx_page !== undefined && value != null) {
+                    url = explorer.tx_page.replace("${txHash}", value)
+                }
+                break
+        }
+
+        if(url !== '') {
+            return <Link href={url} target={"_blank"}>{truncate? truncateAddress(value) : value}</Link>
+        }
+        return <>{value}</>
     }
 
     function getAttr(attributes: any[], which: string): string {
         const a = attributes.find((attr) => attr.key === which)
-        return a.value
+        return a?.value
     }
 
     function isSenderOrReceiver(attributes: any[]): boolean {
@@ -42,93 +61,81 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
         return sender === address || receiver === address;
     }
 
-    function parseStreamDeposit(attributes: any[]): string {
-        let msg = ''
-        const sender = getWalletAddress(attributes, "sender")
-        const receiver = getWalletAddress(attributes, "receiver")
+    function parseStreamDeposit(attributes: any[], txHash: string): React.JSX.Element {
+        const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
+        const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const amount = getAttr(attributes, "amount_deposited")
-
-        if(isSenderOrReceiver(attributes)) {
-            msg = `Top Up deposit: ${sender} -> ${receiver}: ${amount}`
-        }
-        return msg
+        const txHashLink = formatExplorerUrl(txHash, "tx", true)
+        return <>Tx {txHashLink} - Top Up deposit: {sender} -&gt; {receiver}: {amount}</>
     }
 
-    function parseCreateStream(attributes: any[]): string {
-        let msg = ''
-        const sender = getWalletAddress(attributes, "sender")
-        const receiver = getWalletAddress(attributes, "receiver")
+    function parseCreateStream(attributes: any[], txHash: string): React.JSX.Element {
+        const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
+        const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const flowRate = getAttr(attributes, "flow_rate")
-        if(isSenderOrReceiver(attributes)) {
-            msg = `Create Stream: ${sender} -> ${receiver}: ${flowRate} nund/sec`
-        }
-        return msg
+        const txHashLink = formatExplorerUrl(txHash, "tx", true)
+        return <>Tx {txHashLink} - Create Stream: {sender} -&gt; {receiver}: {flowRate} nund/sec</>
     }
 
-    function parseClaimStream(attributes: any[]): string {
-        let msg = ''
-        const sender = getWalletAddress(attributes, "sender")
-        const receiver = getWalletAddress(attributes, "receiver")
+    function parseClaimStream(attributes: any[], txHash: string): React.JSX.Element {
+        const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
+        const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const amount = getAttr(attributes, "claim_total")
-        if(isSenderOrReceiver(attributes)) {
-            msg = `Claim Stream: ${sender} -> ${receiver}: ${amount}`
-        }
-        return msg
+        const txHashLink = formatExplorerUrl(txHash, "tx", true)
+        return <>Tx {txHashLink} - Claim Stream: {sender} -&gt; {receiver}: {amount}</>
     }
 
-    function parseUpdateFlowRate(attributes: any[]): string {
-        let msg = ''
-        const sender = getWalletAddress(attributes, "sender")
-        const receiver = getWalletAddress(attributes, "receiver")
+    function parseUpdateFlowRate(attributes: any[], txHash: string): React.JSX.Element {
+        const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
+        const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
         const oldFlowRate = getAttr(attributes, "old_flow_rate")
         const newFlowRate = getAttr(attributes, "new_flow_rate")
-        if(isSenderOrReceiver(attributes)) {
-            msg = `Update Flow Rate: ${sender} -> ${receiver} from ${oldFlowRate} to ${newFlowRate} nund/sec`
-        }
-        return msg
+        const txHashLink = formatExplorerUrl(txHash, "tx", true)
+        return <>Tx {txHashLink} - Update Flow Rate: {sender} -&gt; {receiver} from {oldFlowRate} to {newFlowRate} nund/sec</>
     }
 
-    function parseCancelStream(attributes: any[]): string {
-        let msg = ''
-        const sender = getWalletAddress(attributes, "sender")
-        const receiver = getWalletAddress(attributes, "receiver")
-        if(isSenderOrReceiver(attributes)) {
-            msg = `Stream Cancelled: ${sender} -> ${receiver}`
-        }
-        return msg
+    function parseCancelStream(attributes: any[], txHash: string): React.JSX.Element {
+        const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
+        const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
+        const txHashLink = formatExplorerUrl(txHash, "tx", true)
+        return <>Tx {txHashLink} - Stream Cancelled: {sender} -&gt; {receiver}</>
     }
 
-    function parseEvent(e: any):string {
-        let message = ''
-        switch(e.type) {
-            case "stream_deposit":
-                return parseStreamDeposit(e.attributes)
-            case "create_stream":
-                return parseCreateStream(e.attributes)
-            case "claim_stream":
-                return parseClaimStream(e.attributes)
-            case "update_flow_rate":
-                return parseUpdateFlowRate(e.attributes)
-            case "cancel_stream":
-                return parseCancelStream(e.attributes)
+    function parseEvent(e: any, txHash: string):React.JSX.Element | null {
+        if(isSenderOrReceiver(e.attributes)) {
+            switch (e.type) {
+                case "stream_deposit":
+                    return parseStreamDeposit(e.attributes, txHash)
+                case "create_stream":
+                    return parseCreateStream(e.attributes, txHash)
+                case "claim_stream":
+                    return parseClaimStream(e.attributes, txHash)
+                case "update_flow_rate":
+                    return parseUpdateFlowRate(e.attributes, txHash)
+                case "cancel_stream":
+                    return parseCancelStream(e.attributes, txHash)
+            }
         }
-        return message
+        return null
     }
 
     useEffect(() => {
         if (lastMessage !== null) {
             const res = JSON.parse(lastMessage.data.toString())
             let prev = [...messageHistory]
-            const blockHeight = res.result.data?.value.TxResult.height
+            let txHash = ''
+            if(res.result?.events) {
+                txHash = res.result?.events["tx.hash"][0]
+            }
 
             for(let i = 0; i < res.result.data?.value.TxResult.result.events.length; i++) {
                 const e = res.result.data?.value.TxResult.result.events[i]
-                const msg = parseEvent(e)
-                if(msg !== '') {
+                const msg = parseEvent(e, txHash)
+                if(msg !== null) {
                     if(prev.length >= 10) {
                         prev.pop()
                     }
-                    prev = [`Block #${blockHeight}: ${msg}`].concat(prev)
+                    prev = [msg].concat(prev)
                 }
             }
 

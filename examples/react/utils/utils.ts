@@ -109,7 +109,7 @@ export function parseStreamError(value: string) {
     return value
 }
 
-export function truncateAddress(fullStr: string, strLen: number, separator: string) {
+export function truncateAddress(fullStr: string, strLen: number = 20, separator: string = "...") {
     if (fullStr.length <= strLen) return fullStr;
 
     separator = separator || '...';
