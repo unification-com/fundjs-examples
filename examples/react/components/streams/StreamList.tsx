@@ -257,7 +257,7 @@ export function StreamList({chainName}: StreamsProps) {
             <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
 
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {isLoadingStreamData || isLoadingParamsData || isLoadingBalanceData ? Loading : streamData.streamsAsSender?.map((streamRes: {
+            {isLoadingStreamData || isLoadingParamsData ? Loading : streamData.streamsAsSender?.map((streamRes: {
                 sender: string;
                 receiver: string;
                 stream: StreamType;
@@ -269,7 +269,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
-                    walletBalance={parseInt(currentBalance.balance.amount, 10)}
+                    walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
@@ -285,7 +285,7 @@ export function StreamList({chainName}: StreamsProps) {
             </Text>
             <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {isLoadingStreamData || isLoadingParamsData || isLoadingBalanceData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            {isLoadingStreamData || isLoadingParamsData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
@@ -293,7 +293,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
-                    walletBalance={parseInt(currentBalance.balance.amount, 10)}
+                    walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
