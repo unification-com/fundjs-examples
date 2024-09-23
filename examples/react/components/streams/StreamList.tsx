@@ -1,27 +1,21 @@
 import {useChain} from "@cosmos-kit/react";
-import {
-    BasicModal,
-    Box, Button, Link,
-    Spinner,
-    Tabs,
-    Text, toast,
-    useColorModeValue,
-} from "@interchain-ui/react";
+import {BasicModal, Box, Button, Link, Spinner, Tabs, Text, toast, useColorModeValue,} from "@interchain-ui/react";
 import {useModal, usePaymentStreamData, useQueryBalance} from "@/hooks";
-import {exponentiate, getCoin, getExponent, getExplorer} from "@/utils";
+import {exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
 import {Stream} from "@/components/streams/Stream";
 import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
 import {useEffect, useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
-import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+import {Stream as StreamType} from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
 import {useQueryStreamParams} from "@/hooks/useQueryStreamParams";
+import {WalletStatus} from "@cosmos-kit/core";
 
 export type StreamsProps = {
     chainName: string;
 };
 
 export function StreamList({chainName}: StreamsProps) {
-    const {address} = useChain(chainName);
+    const {address, status: walletStatus} = useChain(chainName);
     const {data: streamData, isLoading: isLoadingStreamData, refetch: refetchStreamData} = usePaymentStreamData(chainName);
     const {data: balanceData, isLoading: isLoadingBalanceData, refetch: refetchBalanceData} = useQueryBalance(chainName, "nund");
     const {data: paramsData, isLoading: isLoadingParamsData, refetch: refetchParamsData} = useQueryStreamParams(chainName);
@@ -44,20 +38,30 @@ export function StreamList({chainName}: StreamsProps) {
         deposit: 0,
         flowRate: 0,
         depositEndTime: 0,
+        receiverAmount: 0,
+        validatorAmount: 0,
     })
 
     const coin = getCoin(chainName);
     const exponent = getExponent(chainName);
     const explorer = getExplorer(chainName)
 
+    // refetch data when wallet address changes - only if not data is currently loading
     useEffect(() => {
-        if (address && address !== currentAddress) {
+        if (
+            address
+            && address !== currentAddress
+            && walletStatus === WalletStatus.Connected
+            && !isLoadingStreamData
+            && !isLoadingBalanceData
+            && !isLoadingParamsData
+        ) {
             setCurrentAddress(address);
             refetchStreamData()
             refetchBalanceData()
             refetchParamsData()
         }
-    }, [address]);
+    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, isLoadingParamsData]);
 
     function handleClickRefreshButton(e: { preventDefault: () => void; }) {
         e.preventDefault();
@@ -117,15 +121,18 @@ export function StreamList({chainName}: StreamsProps) {
         const now = Math.floor(Date.now() / 1000)
         const nund = exponentiate(deposit, exponent)
         const timeLeft = Math.round(nund / flowRate)
-        const depositZeroTime = now + timeLeft
-        return depositZeroTime
+        return now + timeLeft
     }
 
     function handleCreateNewStreamInputChange(e: { target: { name: any; value: any; }; }) {
         const {name, value} = e.target;
         if (name === "deposit") {
+            const vf = parseFloat(paramsData.params.validatorFee)
+            const validatorAmount = value * vf
+            const receiverAmount = value - validatorAmount
+
             const depositEndTime = calculateDepositEndTime(value, newStreamFormData.flowRate);
-            setNewStreamFormData({...newStreamFormData, [name]: value, depositEndTime});
+            setNewStreamFormData({...newStreamFormData, [name]: value, depositEndTime, validatorAmount, receiverAmount});
         } else {
             setNewStreamFormData({...newStreamFormData, [name]: value});
         }
@@ -138,6 +145,11 @@ export function StreamList({chainName}: StreamsProps) {
         d.deposit = initStreamFormData.fund
         d.flowRate = parseInt(flowRate)
         d.depositEndTime = calculateDepositEndTime(initStreamFormData.fund, parseInt(flowRate))
+
+        const vf = parseFloat(paramsData.params.validatorFee)
+        const validatorAmount = initStreamFormData.fund * vf
+        d.validatorAmount = validatorAmount
+        d.receiverAmount = initStreamFormData.fund - validatorAmount
         setNewStreamFormData(d);
         setIsCalculated(true)
     }
@@ -155,6 +167,8 @@ export function StreamList({chainName}: StreamsProps) {
             deposit: 0,
             flowRate: 0,
             depositEndTime: 0,
+            receiverAmount: 0,
+            validatorAmount: 0,
         })
 
         setIsCalculated(false)
@@ -269,7 +283,7 @@ export function StreamList({chainName}: StreamsProps) {
     )
 
     const createNewStreamContent = (
-        <Box mt="$8" width="100%" display="table" justifyContent={"centre"}>
+        <Box mt="$8" width="100%" display="table" justifyContent={"centre"} borderRadius="$lg" backgroundColor="$cardBg" px="$4" py="$4">
             <Box mt="$8" display="table-row">
                 <Box mt="$8" display="table-cell">
                     <form onSubmit={handleInitNewStreamSubmit} className={"payment-stream-form"}>
@@ -277,36 +291,32 @@ export function StreamList({chainName}: StreamsProps) {
                         <Text fontSize="$lg" fontWeight="$bold">
                             1. Calculate Flow Rate
                         </Text>
-                        <label>
+                        <Text>
                             Send:
                             <input type="text" size={5} name="fund" value={initStreamFormData.fund}
                                    onChange={handleInitNewStreamInputChange}/> FUND
-                        </label>
-                        <br/>
-                        <label>
+                        </Text>
+                        <Text>
                             Every
                             <input type="text" size={1} name="duration" value={initStreamFormData.duration}
                                    onChange={handleInitNewStreamInputChange}/>
-                        </label>
 
-                        <select value={initStreamFormData.period} onChange={handleInitNewStreamInputChange}
-                                name="period">
-                            <option value="1">Second</option>
-                            <option value="2">Minute</option>
-                            <option value="3">Hour</option>
-                            <option value="4">Day</option>
-                            <option value="5">Week</option>
-                            <option value="6">Month</option>
-                            <option value="7">Year</option>
-                        </select>
-
-                        <br/>
-                        <label>
+                            <select value={initStreamFormData.period} onChange={handleInitNewStreamInputChange}
+                                    name="period">
+                                <option value="2">Minute</option>
+                                <option value="3">Hour</option>
+                                <option value="4">Day</option>
+                                <option value="5">Week</option>
+                                <option value="6">Month</option>
+                                <option value="7">Year</option>
+                            </select>
+                        </Text>
+                        <Text>
                             To:
                             <input type="text" name="receiver" value={initStreamFormData.receiver}
                                    placeholder={"enter wallet address"}
                                    onChange={handleInitNewStreamInputChange}/>
-                        </label>
+                        </Text>
                         <br/>
                         <button type="submit">Calculate</button>
                     </form>
@@ -334,6 +344,19 @@ export function StreamList({chainName}: StreamsProps) {
                                 <Text fontSize="$lg">
                                     <strong>Deposit End:</strong> {new Date(newStreamFormData.depositEndTime * 1000).toLocaleString()}
                                 </Text>
+
+                                <br />
+
+                                {paramsData && <Text fontSize="$sm">
+                                    <strong>Note:</strong> A {parseFloat(paramsData?.params?.validatorFee) * 100}%
+                                    Validator fee will
+                                    automatically be deducted each time a claim is made.<br/>
+
+                                    Receiver
+                                    Amount: {new Intl.NumberFormat('en-GB').format(newStreamFormData.receiverAmount)} FUND<br/>
+                                    Validator
+                                    Fee: {new Intl.NumberFormat('en-GB').format(newStreamFormData.validatorAmount)} FUND
+                                </Text>}
 
                                 <input type="hidden" name="receiver" value={newStreamFormData.receiver}/>
 
