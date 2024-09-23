@@ -25,6 +25,7 @@ export function StreamList({chainName}: StreamsProps) {
     const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
     const [ modalContent, setModalContent ] = useState(<></>)
     const [currentAddress, setCurrentAddress] = useState<string>("")
+    const [currentBalance, setCurrentBalance] = useState<any>(null)
 
     const [initStreamFormData, setInitStreamFormData] = useState({
         fund: 100,
@@ -61,7 +62,33 @@ export function StreamList({chainName}: StreamsProps) {
             refetchBalanceData()
             refetchParamsData()
         }
-    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, isLoadingParamsData]);
+
+        if(
+            address
+            && !isLoadingBalanceData
+        ) {
+            // refresh balance every 6 seconds.
+            // ToDo - use websockets and listed for message.receiver=address
+            const interval = setInterval(() => {
+                refetchBalanceData()
+            }, 6000);
+            return () => {
+                clearInterval(interval);
+            };
+        }
+
+    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, isLoadingParamsData, balanceData]);
+
+    useEffect(() => {
+        if (
+            balanceData
+            && parseInt(balanceData?.balance?.amount, 10 ) > 0
+            && parseInt(balanceData?.balance?.amount, 10 ) !== parseInt(currentBalance?.balance?.amount, 10 )
+        ) {
+            setCurrentBalance(balanceData)
+        }
+
+    }, [balanceData]);
 
     function handleClickRefreshButton(e: { preventDefault: () => void; }) {
         e.preventDefault();
@@ -80,7 +107,7 @@ export function StreamList({chainName}: StreamsProps) {
         openStatusModal();
         const nund = exponentiate(newStreamFormData.deposit, exponent)
 
-        if(nund > parseInt(balanceData.balance.amount, 10)) {
+        if(nund > parseInt(currentBalance.balance.amount, 10)) {
             onCreateNewStreamError("Cannot deposit more than balance")
             return
         }
@@ -242,7 +269,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
-                    walletBalance={parseInt(balanceData.balance.amount, 10)}
+                    walletBalance={parseInt(currentBalance.balance.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
@@ -266,7 +293,7 @@ export function StreamList({chainName}: StreamsProps) {
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
                     validatorFeePerc={parseFloat(paramsData.params.validatorFee)}
-                    walletBalance={parseInt(balanceData.balance.amount, 10)}
+                    walletBalance={parseInt(currentBalance.balance.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
@@ -277,9 +304,17 @@ export function StreamList({chainName}: StreamsProps) {
 
     // @ts-ignore
     const balance = (
-        isLoadingBalanceData ? null : <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
-           Balance: {new Intl.NumberFormat('en-GB').format( exponentiate(balanceData?.balance?.amount, -exponent))} FUND
-        </Text>
+
+        <>
+            <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
+                Balance: {
+                parseInt(currentBalance?.balance?.amount, 10 ) > 0 ?
+                new Intl.NumberFormat('en-GB').format( exponentiate(currentBalance?.balance?.amount, -exponent))
+                    : 0
+            } FUND
+            </Text>
+        </>
+
     )
 
     const createNewStreamContent = (
