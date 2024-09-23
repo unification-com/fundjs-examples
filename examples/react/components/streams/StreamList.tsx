@@ -1,5 +1,16 @@
 import {useChain} from "@cosmos-kit/react";
-import {BasicModal, Box, Button, Link, Spinner, Tabs, Text, toast, useColorModeValue,} from "@interchain-ui/react";
+import {
+    BasicModal,
+    Box,
+    Button,
+    Link,
+    Spinner,
+    Stack,
+    Tabs,
+    Text,
+    toast,
+    useColorModeValue,
+} from "@interchain-ui/react";
 import {useModal, usePaymentStreamData, useQueryBalance} from "@/hooks";
 import {exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
 import {Stream} from "@/components/streams/Stream";
@@ -68,7 +79,7 @@ export function StreamList({chainName}: StreamsProps) {
             && !isLoadingBalanceData
         ) {
             // refresh balance every 6 seconds.
-            // ToDo - use websockets and listed for message.receiver=address
+            // ToDo - use websockets and listen for message.receiver=address
             const interval = setInterval(() => {
                 refetchBalanceData()
             }, 6000);
@@ -251,13 +262,17 @@ export function StreamList({chainName}: StreamsProps) {
 
     const asSenderStreams = (
         <>
-            <Text fontSize={"$xl"} fontWeight={"$bold"}>
-                Streams as Sender
-            </Text>
-            <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
-
+            <Stack
+                direction="horizontal"
+                space="$6"
+            >
+                <Text fontSize={"$xl"} fontWeight={"$bold"}>
+                    Streams as Sender
+                </Text>
+                <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
+            </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {isLoadingStreamData || isLoadingParamsData ? Loading : streamData.streamsAsSender?.map((streamRes: {
+                {streamData.streamsAsSender?.length > 0 ? streamData.streamsAsSender?.map((streamRes: {
                 sender: string;
                 receiver: string;
                 stream: StreamType;
@@ -273,19 +288,24 @@ export function StreamList({chainName}: StreamsProps) {
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
-            ))}
+            )) : <Text fontSize={"&lg"} fontWeight={"$bold"}>No streams</Text>}
             </Box>
         </>
     )
 
     const asReceiverStreams = (
         <>
-            <Text fontSize={"$xl"} fontWeight={"$bold"}>
-                Streams as Receiver
-            </Text>
-            <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
+            <Stack
+                direction="horizontal"
+                space="$6"
+            >
+                <Text fontSize={"$xl"} fontWeight={"$bold"}>
+                    Streams as Receiver
+                </Text>
+                <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
+            </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {isLoadingStreamData || isLoadingParamsData ? Loading : streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            {streamData.streamsAsReceiver?.length > 0 ? streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
@@ -297,7 +317,7 @@ export function StreamList({chainName}: StreamsProps) {
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
                 />
-            ))}
+            )) : <Text>No streams</Text> }
             </Box>
         </>
     )
