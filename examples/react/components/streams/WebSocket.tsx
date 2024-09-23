@@ -15,6 +15,8 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
     const [socketUrl, setSocketUrl] = useState('');
     const [messageHistory, setMessageHistory] = useState<React.JSX.Element[]>([]);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [currentAddress, setCurrentAddress] = useState<string>("")
+    const [sendersReceivers, setSendersReceivers] = useState<string[]>([])
 
     useEffect(() => {
         if(chain.apis?.wss) {
@@ -24,6 +26,18 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
             setSocketUrl(`${wss}/websocket`)
         }
     }, [chain]);
+
+    useEffect(() => {
+        if (
+            address && address !== currentAddress
+        ) {
+            const sr = [...sendersReceivers]
+            if(!sr.includes(address)) {
+                setCurrentAddress(address);
+                setMessageHistory([])
+            }
+        }
+    }, [address]);
 
     const explorer = getExplorer(chainName)
 
@@ -58,6 +72,14 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
     function isSenderOrReceiver(attributes: any[]): boolean {
         const sender = getAttr(attributes, "sender")
         const receiver = getAttr(attributes, "receiver")
+        const sr = [...sendersReceivers]
+        if(!sr.includes(sender)) {
+            sr.push(sender)
+        }
+        if(!sr.includes(receiver)) {
+            sr.push(receiver)
+        }
+        setSendersReceivers(sr)
         return sender === address || receiver === address;
     }
 
