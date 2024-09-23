@@ -48,13 +48,13 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
 
     function formatExplorerUrl(value: string, what: string, truncate: boolean): React.JSX.Element {
         let url = ''
-        let len = 20
+        let len = 16
         switch(what) {
             case "account":
                 if(explorer.account_page !== undefined && value != null) {
                     url = explorer.account_page.replace("${accountAddress}", value)
                 }
-                len = 20
+                len = 16
                 break
             case "tx":
                 if(explorer.tx_page !== undefined && value != null) {
@@ -110,10 +110,12 @@ export const WebSocket = ({chainName}: WebSocketProps) => {
     function parseClaimStream(attributes: any[], txHash: string): React.JSX.Element {
         const sender = formatExplorerUrl(getAttr(attributes, "sender"), "account", true)
         const receiver = formatExplorerUrl(getAttr(attributes, "receiver"), "account", true)
-        const amount = parseCoins(getAttr(attributes, "claim_total"))
-        const amountFund = exponentiate(amount[0].amount, -exponent).toFixed(3)
+        const amountReceived = parseCoins(getAttr(attributes, "amount_received"))
+        const amountReceivedFund = exponentiate(amountReceived[0].amount, -exponent).toFixed(3)
+        const amountValFee = parseCoins(getAttr(attributes, "validator_fee"))
+        const amountValFeeFund = exponentiate(amountValFee[0].amount, -exponent).toFixed(3)
         const txHashLink = formatExplorerUrl(txHash, "tx", true)
-        return <>Tx {txHashLink} - Claim Stream: {sender} -&gt; {receiver}: {amountFund} {chainCoin.symbol}</>
+        return <>Tx {txHashLink} - Claim Stream: {sender} -&gt; {receiver}: Received {amountReceivedFund} {chainCoin.symbol} (Val. fee {amountValFeeFund} {chainCoin.symbol})</>
     }
 
     function parseUpdateFlowRate(attributes: any[], txHash: string): React.JSX.Element {
