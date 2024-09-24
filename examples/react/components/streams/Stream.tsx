@@ -432,7 +432,7 @@ export function Stream({
                         </Box>
                         <Box mt="$8" display="table-cell">
                             <Text fontSize="$sm" fontWeight="$bold">
-                                {streamData.depositZeroTime.toLocaleString()}
+                                {streamData.depositZeroTime.toLocaleString('en-GB')}
                             </Text>
                         </Box>
                     </Box>
@@ -444,7 +444,7 @@ export function Stream({
                         </Box>
                         <Box mt="$8" display="table-cell">
                             <Text fontSize="$sm" fontWeight="$bold">
-                                {streamData.lastOutflowTime.toLocaleString()}
+                                {streamData.lastOutflowTime.toLocaleString('en-GB')}
                             </Text>
                         </Box>
                     </Box>

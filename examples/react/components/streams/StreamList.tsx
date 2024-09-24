@@ -415,7 +415,7 @@ export function StreamList({chainName}: StreamsProps) {
                                 </Text>
                                 <Text fontSize="$lg">
                                     <strong>Deposit
-                                        End:</strong> {new Date(newStreamFormData.depositEndTime * 1000).toLocaleString()}
+                                        End:</strong> {new Date(newStreamFormData.depositEndTime * 1000).toLocaleString('en-GB')}
                                 </Text>
 
                                 <br/>
