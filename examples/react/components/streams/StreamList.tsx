@@ -43,6 +43,7 @@ export function StreamList({chainName}: StreamsProps) {
     const [modalContent, setModalContent] = useState(<></>)
     const [currentAddress, setCurrentAddress] = useState<string>("")
     const [currentBalance, setCurrentBalance] = useState<any>(null)
+    const [currentChainName, setCurrentChainName] = useState(chainName)
 
     const [initStreamFormData, setInitStreamFormData] = useState({
         fund: 100,
@@ -66,13 +67,15 @@ export function StreamList({chainName}: StreamsProps) {
     // refetch data when wallet address changes - only if not data is currently loading
     useEffect(() => {
         if (
-            address
+            address && chainName
+            && chainName !== currentChainName
             && address !== currentAddress
             && walletStatus === WalletStatus.Connected
             && !isLoadingStreamData
             && !isLoadingBalanceData
         ) {
             setCurrentAddress(address);
+            setCurrentChainName(chainName)
             refetchStreamData()
             refetchBalanceData()
         }
@@ -91,12 +94,12 @@ export function StreamList({chainName}: StreamsProps) {
             };
         }
 
-    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, balanceData]);
+    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, balanceData, chainName]);
 
     useEffect(() => {
         if (
             balanceData
-            && parseInt(balanceData?.balance?.amount, 10) > 0
+            && balanceData.balance !== undefined
             && parseInt(balanceData?.balance?.amount, 10) !== parseInt(currentBalance?.balance?.amount, 10)
         ) {
             setCurrentBalance(balanceData)
