@@ -18,7 +18,6 @@ import {useCalculateFlowRate} from "@/hooks/useCalculateFlowRate";
 import {useEffect, useState} from "react";
 import {useCreateStream} from "@/hooks/useCreateStream";
 import {Stream as StreamType} from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
-import {useQueryStreamParams} from "@/hooks/useQueryStreamParams";
 import {WalletStatus} from "@cosmos-kit/core";
 
 export type StreamsProps = {
@@ -29,9 +28,8 @@ export function StreamList({chainName}: StreamsProps) {
     const {address, status: walletStatus} = useChain(chainName);
     const {data: streamData, isLoading: isLoadingStreamData, refetch: refetchStreamData} = usePaymentStreamData(chainName);
     const {data: balanceData, isLoading: isLoadingBalanceData, refetch: refetchBalanceData} = useQueryBalance(chainName, "nund");
-    const {data: paramsData, isLoading: isLoadingParamsData, refetch: refetchParamsData} = useQueryStreamParams(chainName);
-    const {isCalculating, onCalculateFlowRate} = useCalculateFlowRate(chainName);
-    const {isCreating, onCreateStream} = useCreateStream(chainName)
+    const {onCalculateFlowRate} = useCalculateFlowRate(chainName);
+    const {onCreateStream} = useCreateStream(chainName)
     const [isCalculated, setIsCalculated] = useState(false)
     const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
     const [ modalContent, setModalContent ] = useState(<></>)
@@ -54,7 +52,6 @@ export function StreamList({chainName}: StreamsProps) {
         validatorAmount: 0,
     })
 
-    const coin = getCoin(chainName);
     const exponent = getExponent(chainName);
     const explorer = getExplorer(chainName)
 
@@ -66,12 +63,10 @@ export function StreamList({chainName}: StreamsProps) {
             && walletStatus === WalletStatus.Connected
             && !isLoadingStreamData
             && !isLoadingBalanceData
-            && !isLoadingParamsData
         ) {
             setCurrentAddress(address);
             refetchStreamData()
             refetchBalanceData()
-            refetchParamsData()
         }
 
         if(
@@ -88,7 +83,7 @@ export function StreamList({chainName}: StreamsProps) {
             };
         }
 
-    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, isLoadingParamsData, balanceData]);
+    }, [walletStatus, address, isLoadingStreamData, isLoadingBalanceData, balanceData]);
 
     useEffect(() => {
         if (
@@ -105,7 +100,6 @@ export function StreamList({chainName}: StreamsProps) {
         e.preventDefault();
         refetchStreamData()
         refetchBalanceData()
-        refetchParamsData()
     }
 
     function handleCreateNewStreamSubmit(e: { preventDefault: () => void; }) {
@@ -165,7 +159,7 @@ export function StreamList({chainName}: StreamsProps) {
     function handleCreateNewStreamInputChange(e: { target: { name: any; value: any; }; }) {
         const {name, value} = e.target;
         if (name === "deposit") {
-            const vf = parseFloat(paramsData.params.validatorFee)
+            const vf = parseFloat(streamData.params.validatorFee)
             const validatorAmount = value * vf
             const receiverAmount = value - validatorAmount
 
@@ -184,7 +178,7 @@ export function StreamList({chainName}: StreamsProps) {
         d.flowRate = parseInt(flowRate)
         d.depositEndTime = calculateDepositEndTime(initStreamFormData.fund, parseInt(flowRate))
 
-        const vf = parseFloat(paramsData.params.validatorFee)
+        const vf = parseFloat(streamData.params.validatorFee)
         const validatorAmount = initStreamFormData.fund * vf
         d.validatorAmount = validatorAmount
         d.receiverAmount = initStreamFormData.fund - validatorAmount
@@ -272,7 +266,7 @@ export function StreamList({chainName}: StreamsProps) {
                 <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
             </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-                {streamData.streamsAsSender?.length > 0 ? streamData.streamsAsSender?.map((streamRes: {
+                {streamData.streamsAsSender?.streams?.length > 0 ? streamData.streamsAsSender?.streams?.map((streamRes: {
                 sender: string;
                 receiver: string;
                 stream: StreamType;
@@ -283,7 +277,7 @@ export function StreamList({chainName}: StreamsProps) {
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(paramsData?.params?.validatorFee)}
+                    validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
                     walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
@@ -305,14 +299,14 @@ export function StreamList({chainName}: StreamsProps) {
                 <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
             </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {streamData.streamsAsReceiver?.length > 0 ? streamData.streamsAsReceiver?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
+            {streamData.streamsAsReceiver?.streams?.length > 0 ? streamData.streamsAsReceiver?.streams?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
                 <Stream
                     key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
                     chainName={chainName}
                     sender={streamRes.sender}
                     receiver={streamRes.receiver}
                     stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(paramsData?.params?.validatorFee)}
+                    validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
                     walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
                     refetchStreams={refetchStreamData}
                     refetchBalanceData={refetchBalanceData}
@@ -402,8 +396,8 @@ export function StreamList({chainName}: StreamsProps) {
 
                                 <br />
 
-                                {paramsData && <Text fontSize="$sm">
-                                    <strong>Note:</strong> A {parseFloat(paramsData?.params?.validatorFee) * 100}%
+                                {streamData?.params && <Text fontSize="$sm">
+                                    <strong>Note:</strong> A {parseFloat(streamData?.params?.validatorFee) * 100}%
                                     Validator fee will
                                     automatically be deducted each time a claim is made.<br/>
 
@@ -443,11 +437,11 @@ export function StreamList({chainName}: StreamsProps) {
                 },
                 {
                     content: asSenderStreams,
-                    label: `As Sender (${isLoadingStreamData ? 0 : streamData.streamsAsSender?.length})`
+                    label: `As Sender (${isLoadingStreamData ? 0 : streamData.streamsAsSender?.pagination?.total})`
                 },
                 {
                     content: asReceiverStreams,
-                    label: `As Receiver (${isLoadingStreamData ? 0 : streamData.streamsAsReceiver?.length})`
+                    label: `As Receiver (${isLoadingStreamData ? 0 : streamData.streamsAsReceiver?.pagination?.total})`
                 }
             ]}
         />
