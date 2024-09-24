@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { mainchain } from '@unification-com/fundjs-react';
-import { toast } from '@interchain-ui/react';
-import { useChain } from '@cosmos-kit/react';
-import { coins, StdFee, coin, parseCoins, Coin } from '@cosmjs/stargate';
-import { useTx } from '@/hooks';
-import { getCoin } from '@/utils';
+import {useState} from 'react';
+import {mainchain} from '@unification-com/fundjs-react';
+import {toast} from '@interchain-ui/react';
+import {useChain} from '@cosmos-kit/react';
+import {coins, StdFee, parseCoins, Coin} from '@cosmjs/stargate';
+import {useTx} from '@/hooks';
+import {getCoin} from '@/utils';
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
 
@@ -15,13 +15,17 @@ export type onClaimStreamOptions = {
 }
 
 export function useClaimStream(chainName: string) {
-    const { tx } = useTx(chainName);
-    const { address } = useChain(chainName);
+    const {tx} = useTx(chainName);
+    const {address} = useChain(chainName);
     const [isClaiming, setIsClaiming] = useState(false);
 
     const chainCoin = getCoin(chainName);
 
-    async function onClaimStream({ sender, success = (remaining, txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onClaimStreamOptions) {
+    async function onClaimStream({
+                                     sender, success = (remaining, txHash: string | undefined) => {
+        }, error = (errMsg: string) => {
+        }
+                                 }: onClaimStreamOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.claimStream({
@@ -36,7 +40,7 @@ export function useClaimStream(chainName: string) {
 
         try {
             setIsClaiming(true);
-            const res = await tx([msg], { fee });
+            const res = await tx([msg], {fee});
             if (res.error) {
                 error(res.errorMsg);
                 console.error(res.error);
@@ -44,13 +48,13 @@ export function useClaimStream(chainName: string) {
             } else {
                 const remainingCoins = parseCoins("0nund")
                 let remaining = remainingCoins[0]
-                if(res.response?.events) {
-                    for(let i = 0; i < res.response?.events.length; i += 1) {
+                if (res.response?.events) {
+                    for (let i = 0; i < res.response?.events.length; i += 1) {
                         const e = res.response?.events[i]
-                        if(e?.type === "claim_stream") {
-                            for(let j = 0; j < e.attributes.length; j += 1) {
+                        if (e?.type === "claim_stream") {
+                            for (let j = 0; j < e.attributes.length; j += 1) {
                                 const a = e.attributes[j]
-                                if(a.key === "remaining_deposit") {
+                                if (a.key === "remaining_deposit") {
                                     const c = parseCoins(a.value)
                                     remaining = c[0]
                                 }
@@ -72,5 +76,5 @@ export function useClaimStream(chainName: string) {
         }
     }
 
-    return { isClaiming, onClaimStream }
+    return {isClaiming, onClaimStream}
 }

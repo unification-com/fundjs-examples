@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { mainchain } from '@unification-com/fundjs-react';
-import { toast } from '@interchain-ui/react';
-import { useChain } from '@cosmos-kit/react';
-import { coins, StdFee, coin } from '@cosmjs/stargate';
-import { useTx } from '@/hooks';
+import {useState} from 'react';
+import {mainchain} from '@unification-com/fundjs-react';
+import {toast} from '@interchain-ui/react';
+import {useChain} from '@cosmos-kit/react';
+import {coins, StdFee, coin} from '@cosmjs/stargate';
+import {useTx} from '@/hooks';
 import {getCoin, parseStreamError} from '@/utils';
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
@@ -17,13 +17,17 @@ export type onCreateStreamOptions = {
 }
 
 export function useCreateStream(chainName: string) {
-    const { tx } = useTx(chainName);
-    const { address } = useChain(chainName);
+    const {tx} = useTx(chainName);
+    const {address} = useChain(chainName);
     const [isCreating, setIsCreating] = useState(false);
 
     const chainCoin = getCoin(chainName);
 
-    async function onCreateStream({ receiver, deposit, flowRate, success = (txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onCreateStreamOptions) {
+    async function onCreateStream({
+                                      receiver, deposit, flowRate, success = (txHash: string | undefined) => {
+        }, error = (errMsg: string) => {
+        }
+                                  }: onCreateStreamOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.createStream({
@@ -40,7 +44,7 @@ export function useCreateStream(chainName: string) {
 
         try {
             setIsCreating(true);
-            const res = await tx([msg], { fee });
+            const res = await tx([msg], {fee});
             if (res.error) {
                 let errMsg: string = parseStreamError(res.errorMsg);
                 error(errMsg);
@@ -59,5 +63,5 @@ export function useCreateStream(chainName: string) {
         }
     }
 
-    return { isCreating, onCreateStream }
+    return {isCreating, onCreateStream}
 }

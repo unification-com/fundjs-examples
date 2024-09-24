@@ -2,6 +2,8 @@ import { assets as baseAssets, chains as baseChains } from "chain-registry";
 import { Chain, AssetList } from '@chain-registry/types';
 import {defaultChainName} from "@/config/defaults";
 
+const supportedChains = (process.env.NEXT_PUBLIC_CHAIN_LIST ? process.env.NEXT_PUBLIC_CHAIN_LIST : 'unification,unificationtestnet').split(",")
+
 const fundAssets: AssetList = baseAssets.find(
     (chain) => chain.chain_name === defaultChainName
 ) as AssetList;
@@ -74,5 +76,23 @@ const unificationDevnet: Chain = {
     ]
 }
 
-export const chains: Chain[] = [unificationMainNet, unificationTestnet, unificationDevnet]
-export const assets: AssetList[] = [fundAssets, unificationTestnetAssets, unificationDevnetAssets]
+const chainList: Chain[] = []
+const assetList: AssetList[] = []
+
+if(supportedChains.includes('unification')) {
+    chainList.push(unificationMainNet)
+    assetList.push(fundAssets)
+}
+
+if(supportedChains.includes('unificationtestnet')) {
+    chainList.push(unificationTestnet)
+    assetList.push(unificationTestnetAssets)
+}
+
+if(supportedChains.includes('unificationdevnet')) {
+    chainList.push(unificationDevnet)
+    assetList.push(unificationDevnetAssets)
+}
+
+export const chains: Chain[] = [...chainList]
+export const assets: AssetList[] = [...assetList]

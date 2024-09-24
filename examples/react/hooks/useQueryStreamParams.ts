@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useChain } from '@cosmos-kit/react';
-import { useQueryHooks } from '.';
+import {useEffect, useMemo, useState} from 'react';
+import {useChain} from '@cosmos-kit/react';
+import {useQueryHooks} from '.';
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
@@ -8,8 +8,8 @@ import { useQueryHooks } from '.';
 
 export function useQueryStreamParams(chainName: string) {
     const [isLoading, setIsLoading] = useState(false);
-    const { address } = useChain(chainName);
-    const { mainchain, isReady, isFetching } = useQueryHooks(chainName);
+    const {address} = useChain(chainName);
+    const {mainchain, isReady, isFetching} = useQueryHooks(chainName);
 
     const paramsQuery = mainchain.stream.v1.useParams({
         request: {},
@@ -34,7 +34,7 @@ export function useQueryStreamParams(chainName: string) {
     }, [chainName]);
 
     const isStaticQueriesFetching = staticQueries.some(
-        ({ isFetching }) => isFetching
+        ({isFetching}) => isFetching
     );
 
     const loading =
@@ -64,5 +64,5 @@ export function useQueryStreamParams(chainName: string) {
         paramsQuery.refetch();
     };
 
-    return { data: { ...singleQueriesData }, isLoading, refetch };
+    return {data: {...singleQueriesData}, isLoading, refetch};
 }
