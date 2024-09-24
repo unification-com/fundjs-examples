@@ -13,11 +13,11 @@ export function formatDate(date?: Date) {
     return dayjs(date).format('YYYY-MM-DD hh:mm:ss');
 };
 
-export function paginate(limit: bigint, reverse: boolean = false) {
+export function paginate(limit: bigint, reverse: boolean = false, key: Uint8Array = new Uint8Array()) {
     return {
         limit,
         reverse,
-        key: new Uint8Array(),
+        key,
         offset: 0n,
         countTotal: true,
     }

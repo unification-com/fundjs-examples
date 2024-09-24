@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { mainchain } from '@unification-com/fundjs-react';
-import { toast } from '@interchain-ui/react';
-import { useChain } from '@cosmos-kit/react';
-import { coins, StdFee, coin, parseCoins, Coin } from '@cosmjs/stargate';
-import { useTx } from '@/hooks';
-import { getCoin } from '@/utils';
+import {useState} from 'react';
+import {mainchain} from '@unification-com/fundjs-react';
+import {toast} from '@interchain-ui/react';
+import {useChain} from '@cosmos-kit/react';
+import {coins, StdFee} from '@cosmjs/stargate';
+import {useTx} from '@/hooks';
+import {getCoin} from '@/utils';
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
 
@@ -16,13 +16,20 @@ export type onUpdateFlowRateOptions = {
 }
 
 export function useUpdateFlowRate(chainName: string) {
-    const { tx } = useTx(chainName);
-    const { address } = useChain(chainName);
+    const {tx} = useTx(chainName);
+    const {address} = useChain(chainName);
     const [isUpdatingFlowRate, setIsUpdatingFlowRate] = useState(false);
 
     const chainCoin = getCoin(chainName);
 
-    async function onUpdateFlowRate({ receiver, flowRate, success = (newFlowRate, depositZeroTime, remainingDeposit, txHash: string | undefined) => { }, error = (errMsg: string) => { } }: onUpdateFlowRateOptions) {
+    async function onUpdateFlowRate({
+                                        receiver,
+                                        flowRate,
+                                        success = (newFlowRate, depositZeroTime, remainingDeposit, txHash: string | undefined) => {
+                                        },
+                                        error = (errMsg: string) => {
+                                        }
+                                    }: onUpdateFlowRateOptions) {
         if (!address) return;
 
         const msg = MessageComposer.withTypeUrl.updateFlowRate({
@@ -38,7 +45,7 @@ export function useUpdateFlowRate(chainName: string) {
 
         try {
             setIsUpdatingFlowRate(true);
-            const res = await tx([msg], { fee });
+            const res = await tx([msg], {fee});
             if (res.error) {
                 error(res.errorMsg);
                 console.error(res.error);
@@ -47,19 +54,19 @@ export function useUpdateFlowRate(chainName: string) {
                 let newFlowRate = '';
                 let depositZeroTime = '';
                 let remainingDeposit = ''
-                if(res.response?.events) {
-                    for(let i = 0; i < res.response?.events.length; i += 1) {
+                if (res.response?.events) {
+                    for (let i = 0; i < res.response?.events.length; i += 1) {
                         const e = res.response?.events[i]
-                        if(e?.type === "update_flow_rate") {
-                            for(let j = 0; j < e.attributes.length; j += 1) {
+                        if (e?.type === "update_flow_rate") {
+                            for (let j = 0; j < e.attributes.length; j += 1) {
                                 const a = e.attributes[j]
-                                if(a.key === "new_flow_rate") {
+                                if (a.key === "new_flow_rate") {
                                     newFlowRate = a.value
                                 }
-                                if(a.key === "deposit_zero_time") {
+                                if (a.key === "deposit_zero_time") {
                                     depositZeroTime = a.value
                                 }
-                                if(a.key === "remaining_deposit") {
+                                if (a.key === "remaining_deposit") {
                                     remainingDeposit = a.value
                                 }
                             }
@@ -80,5 +87,5 @@ export function useUpdateFlowRate(chainName: string) {
         }
     }
 
-    return { isUpdatingFlowRate, onUpdateFlowRate }
+    return {isUpdatingFlowRate, onUpdateFlowRate}
 }

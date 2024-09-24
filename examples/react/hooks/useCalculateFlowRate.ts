@@ -1,4 +1,4 @@
-import {  useState } from 'react';
+import { useState } from 'react';
 import { useRpcQueryClient } from '.';
 import {toast} from "@interchain-ui/react";
 
@@ -15,7 +15,7 @@ export type onCalculateFlowRateOptions = {
 }
 
 export function useCalculateFlowRate(chainName: string) {
-    const { rpcQueryClient } = useRpcQueryClient(chainName);
+    const {rpcQueryClient} = useRpcQueryClient(chainName);
     const [isCalculating, setIsCalculating] = useState(false);
 
     async function onCalculateFlowRate({ coin, period, duration, success = (flowRate) => { }, error = () => { } }: onCalculateFlowRateOptions) {

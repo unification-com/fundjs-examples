@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useChain } from '@cosmos-kit/react';
-import { useQueryHooks } from '.';
+import {useEffect, useMemo, useState} from 'react';
+import {useChain} from '@cosmos-kit/react';
+import {useQueryHooks} from '.';
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
@@ -8,8 +8,8 @@ import { useQueryHooks } from '.';
 
 export function useQueryBalance(chainName: string, denom: string) {
     const [isLoading, setIsLoading] = useState(false);
-    const { address } = useChain(chainName);
-    const { cosmos, isReady, isFetching } = useQueryHooks(chainName);
+    const {address} = useChain(chainName);
+    const {cosmos, isReady, isFetching} = useQueryHooks(chainName);
 
     const balanceQuery = cosmos.bank.v1beta1.useBalance({
         request: {
@@ -37,7 +37,7 @@ export function useQueryBalance(chainName: string, denom: string) {
     }, [chainName]);
 
     const isStaticQueriesFetching = staticQueries.some(
-        ({ isFetching }) => isFetching
+        ({isFetching}) => isFetching
     );
 
     const loading =
@@ -67,5 +67,5 @@ export function useQueryBalance(chainName: string, denom: string) {
         balanceQuery.refetch();
     };
 
-    return { data: { ...singleQueriesData }, isLoading, refetch };
+    return {data: {...singleQueriesData}, isLoading, refetch};
 }

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useChain } from '@cosmos-kit/react';
-import { useQueryHooks } from '.';
-import { paginate } from '@/utils';
+import {useEffect, useMemo, useState} from 'react';
+import {useChain} from '@cosmos-kit/react';
+import {useQueryHooks} from '.';
+import {paginate} from '@/utils';
 
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
@@ -9,41 +9,55 @@ import { paginate } from '@/utils';
 
 export function usePaymentStreamData(chainName: string) {
     const [isLoading, setIsLoading] = useState(false);
-    const { address } = useChain(chainName);
-    const { mainchain, isReady, isFetching } = useQueryHooks(chainName);
+    const [senderPagination, setSenderPagination] = useState(paginate(50n, true));
+    const [receiverPagination, setReceiverPagination] = useState(paginate(50n, true));
+
+    const {address} = useChain(chainName);
+    const {mainchain, isReady, isFetching} = useQueryHooks(chainName);
 
     const paymentStreamsQueryAsSender = mainchain.stream.v1.useAllStreamsForSender({
         request: {
             senderAddr: (address) ? address : '',
-            pagination: paginate(50n, true),
+            pagination: senderPagination,
         },
         options: {
             enabled: isReady,
             staleTime: Infinity,
-            select: ({streams}) => streams,
+            // select: ({streams, pagination}) => streams,
         },
     })
 
     const paymentStreamsQueryAsReceiver = mainchain.stream.v1.useAllStreamsForReceiver({
         request: {
             receiverAddr: (address) ? address : '',
-            pagination: paginate(50n, true),
+            pagination: receiverPagination,
         },
         options: {
             enabled: isReady,
             staleTime: Infinity,
-            select: ({streams}) => streams,
+            // select: ({streams, pagination}) => streams,
+        },
+    })
+
+    const paramsQuery = mainchain.stream.v1.useParams({
+        request: {},
+        options: {
+            enabled: isReady,
+            staleTime: Infinity,
+            select: ({params}) => params,
         },
     })
 
     const singleQueries = {
         streamsAsSender: paymentStreamsQueryAsSender,
         streamsAsReceiver: paymentStreamsQueryAsReceiver,
+        params: paramsQuery,
     };
 
     const staticQueries = [
         singleQueries.streamsAsSender,
         singleQueries.streamsAsReceiver,
+        singleQueries.params,
     ];
 
     useEffect(() => {
@@ -52,7 +66,7 @@ export function usePaymentStreamData(chainName: string) {
     }, [chainName]);
 
     const isStaticQueriesFetching = staticQueries.some(
-        ({ isFetching }) => isFetching
+        ({isFetching}) => isFetching
     );
 
     const loading =
@@ -83,5 +97,5 @@ export function usePaymentStreamData(chainName: string) {
         paymentStreamsQueryAsReceiver.refetch();
     };
 
-    return { data: { ...singleQueriesData }, isLoading, refetch };
+    return {data: {...singleQueriesData}, isLoading, refetch};
 }

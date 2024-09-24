@@ -37,29 +37,35 @@ export function Stream({
                            chainName,
                            validatorFeePerc,
                            walletBalance,
-                           refetchStreams = () => {},
-                           refetchBalanceData = () => {},
+                           refetchStreams = () => {
+                           },
+                           refetchBalanceData = () => {
+                           },
                        }: StreamProps) {
 
-    const { address } = useChain(chainName);
+    const {address} = useChain(chainName);
     const [claimable, setClaimable] = useState(0);
     const [actualReceive, setActualReceive] = useState(0);
     const [validatorFee, setValidatorFee] = useState(0);
     const [remainingDeposit, setRemainingDeposit] = useState(0);
     const [isSender, setIsSender] = useState(address === sender);
     const [showTopUpInfo, setShowTopUpInfo] = useState(false);
-    const { onClaimStream} = useClaimStream(chainName)
-    const { onTopUpDeposit } = useTopUpDeposit(chainName)
-    const { isCalculating, onCalculateFlowRate } = useCalculateFlowRate(chainName);
-    const { onUpdateFlowRate } = useUpdateFlowRate(chainName);
-    const { onCancelStream } = useCancelSteam(chainName)
+    const {onClaimStream} = useClaimStream(chainName)
+    const {onTopUpDeposit} = useTopUpDeposit(chainName)
+    const {isCalculating, onCalculateFlowRate} = useCalculateFlowRate(chainName);
+    const {onUpdateFlowRate} = useUpdateFlowRate(chainName);
+    const {onCancelStream} = useCancelSteam(chainName)
     const [streamData, setStreamData] = useState(stream);
-    const { modal: topupDepositModal, open: openTopupDepositModal, close: closeTopupDepositModal } = useModal("");
-    const { modal: updateFlowRateModal, open: openUpdateFlowRateModal, close: closeUpdateFlowRateModal } = useModal("");
-    const { modal: sendUpdateFlowRateModal, open: openSendUpdateFlowRateModal, close: closeSendUpdateFlowRateModal } = useModal("");
-    const { modal: cancelStreamModal, open: openCancelStreamModal, close: closeCancelStreamModal } = useModal("");
-    const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
-    const [ modalContent, setModalContent ] = useState(<></>)
+    const {modal: topupDepositModal, open: openTopupDepositModal, close: closeTopupDepositModal} = useModal("");
+    const {modal: updateFlowRateModal, open: openUpdateFlowRateModal, close: closeUpdateFlowRateModal} = useModal("");
+    const {
+        modal: sendUpdateFlowRateModal,
+        open: openSendUpdateFlowRateModal,
+        close: closeSendUpdateFlowRateModal
+    } = useModal("");
+    const {modal: cancelStreamModal, open: openCancelStreamModal, close: closeCancelStreamModal} = useModal("");
+    const {modal: statusModal, open: openStatusModal, close: closeStatusModal} = useModal("");
+    const [modalContent, setModalContent] = useState(<></>)
 
 
     const [topUpFormData, setTopUpFormData] = useState({
@@ -82,14 +88,14 @@ export function Stream({
             const flowMs = parseInt(streamData.flowRate.toString(), 10) / 1000
             let claimable = flowMs * timeSince
             const remainingDeposit = parseInt(streamData.deposit.amount.toString(), 10)
-            if(claimable > remainingDeposit) {
+            if (claimable > remainingDeposit) {
                 claimable = remainingDeposit
             }
             const remaining = remainingDeposit - claimable
             const valFee = claimable * validatorFeePerc
 
             setShowTopUpInfo(false)
-            if(now > streamData.depositZeroTime.getTime() && claimable > 0) {
+            if (now > streamData.depositZeroTime.getTime() && claimable > 0) {
                 setShowTopUpInfo(true)
             }
 
@@ -101,7 +107,7 @@ export function Stream({
         return () => {
             clearInterval(interval);
         };
-    }, [streamData]);
+    }, [streamData, validatorFeePerc]);
 
     function handleClaimSubmit(e: { preventDefault: () => void; }) {
         e.preventDefault();
@@ -116,10 +122,12 @@ export function Stream({
                 </Text>
 
                 <Text fontSize="$lg">
-                    <strong>You will receive approx.:</strong> {exponentiate(actualReceive, -exponent).toFixed(3)} {chainCoin.symbol}
+                    <strong>You will receive
+                        approx.:</strong> {exponentiate(actualReceive, -exponent).toFixed(3)} {chainCoin.symbol}
                 </Text>
                 <Text fontSize="$lg">
-                    <strong>{validatorFeePerc * 100}% Validator Fee approx.:</strong> {exponentiate(validatorFee, -exponent).toFixed(3)} {chainCoin.symbol}
+                    <strong>{validatorFeePerc * 100}% Validator Fee
+                        approx.:</strong> {exponentiate(validatorFee, -exponent).toFixed(3)} {chainCoin.symbol}
                 </Text>
                 <Text fontSize="$lg">
                     <Spinner
@@ -127,7 +135,7 @@ export function Stream({
                     /> Sending transaction
                 </Text>
             </>
-            )
+        )
         openStatusModal();
         onClaimStream({
             sender,
@@ -146,14 +154,14 @@ export function Stream({
         setStreamData({...streamData, lastOutflowTime: new Date(), deposit: remaining})
 
         let explorerUrl = <>{txHash}</>
-        if(explorer.tx_page !== undefined && txHash != null) {
+        if (explorer.tx_page !== undefined && txHash != null) {
             const url = explorer.tx_page.replace("${txHash}", txHash)
             explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
         }
 
         setModalContent(
             <Text fontSize="$lg">
-                Claim successful<br />
+                Claim successful<br/>
                 {explorerUrl}
             </Text>
         )
@@ -173,8 +181,8 @@ export function Stream({
     }
 
     function handleTopupDepositInputChange(e: { target: { name: any; value: any; }; }) {
-        const { name, value } = e.target;
-        setTopUpFormData({ ...topUpFormData, [name]: value });
+        const {name, value} = e.target;
+        setTopUpFormData({...topUpFormData, [name]: value});
     }
 
     function handleTopupDepositSubmit(e: { preventDefault: () => void; }) {
@@ -189,7 +197,7 @@ export function Stream({
         const nund = exponentiate(topUpFormData.deposit, exponent)
 
 
-        if(nund > walletBalance) {
+        if (nund > walletBalance) {
             onSendTxError("Cannot deposit more than balance")
             return
         }
@@ -208,20 +216,20 @@ export function Stream({
         setStreamData({...streamData, deposit: newDeposit, depositZeroTime: new Date(depositZeroTime)})
 
         let explorerUrl = <>{txHash}</>
-        if(explorer.tx_page !== undefined && txHash != null) {
+        if (explorer.tx_page !== undefined && txHash != null) {
             const url = explorer.tx_page.replace("${txHash}", txHash)
             explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
         }
 
         setModalContent(<Text fontSize="$lg">
-            Top Up successful<br />
+            Top Up successful<br/>
             {explorerUrl}
         </Text>)
     }
 
     function handleUpdateFlowRateInputChange(e: { target: { name: any; value: any; }; }) {
-        const { name, value } = e.target;
-        setUpdateFlowFormData({ ...updateFlowFormData, [name]: value });
+        const {name, value} = e.target;
+        setUpdateFlowFormData({...updateFlowFormData, [name]: value});
     }
 
     function handleUpdateFlowRateSubmit(e: { preventDefault: () => void; }) {
@@ -245,7 +253,7 @@ export function Stream({
     }
 
     function onCalculateFlowRateSuccess(flowRate: string) {
-        setUpdateFlowFormData({ ...updateFlowFormData, flowRate: parseInt(flowRate, 10) });
+        setUpdateFlowFormData({...updateFlowFormData, flowRate: parseInt(flowRate, 10)});
         closeUpdateFlowRateModal()
         openSendUpdateFlowRateModal()
     }
@@ -271,22 +279,22 @@ export function Stream({
     function onSendUpdateFlowRateSuccess(newFlowRate: string, depositZeroTime: string, remainingDeposit: string, txHash: string | undefined) {
         const parsedCoins = parseCoins(remainingDeposit)
         setStreamData({
-            ...streamData,
-            flowRate: BigInt(newFlowRate),
-            depositZeroTime: new Date(depositZeroTime),
-            deposit: parsedCoins[0],
-            lastOutflowTime: new Date(),
+                ...streamData,
+                flowRate: BigInt(newFlowRate),
+                depositZeroTime: new Date(depositZeroTime),
+                deposit: parsedCoins[0],
+                lastOutflowTime: new Date(),
             }
         )
 
         let explorerUrl = <>{txHash}</>
-        if(explorer.tx_page !== undefined && txHash != null) {
+        if (explorer.tx_page !== undefined && txHash != null) {
             const url = explorer.tx_page.replace("${txHash}", txHash)
             explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
         }
 
         setModalContent(<Text fontSize="$lg">
-            Update flow rate successful<br />
+            Update flow rate successful<br/>
             {explorerUrl}
         </Text>)
     }
@@ -303,13 +311,13 @@ export function Stream({
         )
 
         let explorerUrl = <>{txHash}</>
-        if(explorer.tx_page !== undefined && txHash != null) {
+        if (explorer.tx_page !== undefined && txHash != null) {
             const url = explorer.tx_page.replace("${txHash}", txHash)
             explorerUrl = <Link href={url} target={"_blank"}>{txHash}</Link>
         }
 
         setModalContent(<Text fontSize="$lg">
-            Cancel stream successful <br />
+            Cancel stream successful <br/>
             {explorerUrl}
         </Text>)
     }
@@ -360,9 +368,11 @@ export function Stream({
 
     const accExplorerLink = (
         isSender ?
-           ( explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", receiver)} target={"_blank"}>{receiver}</Link> : receiver)
+            (explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", receiver)}
+                                           target={"_blank"}>{receiver}</Link> : receiver)
             :
-           ( explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", sender)} target={"_blank"}>{sender}</Link> : sender)
+            (explorer.account_page ? <Link href={explorer.account_page.replace("${accountAddress}", sender)}
+                                           target={"_blank"}>{sender}</Link> : sender)
     )
 
     return (
@@ -397,7 +407,8 @@ export function Stream({
                         </Box>
                         <Box mt="$8" display="table-cell">
                             <Text fontSize="$sm" fontWeight="$bold">
-                                {exponentiate(streamData.flowRate?.toString(), -exponent).toFixed(9)} {chainCoin.symbol} / sec
+                                {exponentiate(streamData.flowRate?.toString(), -exponent).toFixed(9)} {chainCoin.symbol} /
+                                sec
                             </Text>
                         </Box>
                     </Box>
@@ -454,7 +465,7 @@ export function Stream({
                 <Box mt="$8" display="table-cell">
                     <Box mt="$8" display="table-cell">
                         <Text fontSize="$sm" fontWeight="$bold">
-                            { isSender ? editButtons : claim}
+                            {isSender ? editButtons : claim}
                         </Text>
                     </Box>
                 </Box>
@@ -487,10 +498,12 @@ export function Stream({
                     {
                         showTopUpInfo ?
                             <Box position="relative" maxWidth={"$containerSm"}>
-                            <Text fontSize="$sm">
-                                Note: the &quot;deposit zero time&quot; has passed. Any remaining unclaimed funds will<br />
-                                be automatically forwarded to the receiver wallet as part of this Top Up transaction.
-                            </Text>
+                                <Text fontSize="$sm">
+                                    Note: the &quot;deposit zero time&quot; has passed. Any remaining unclaimed funds
+                                    will<br/>
+                                    be automatically forwarded to the receiver wallet as part of this Top Up
+                                    transaction.
+                                </Text>
                             </Box>
                             : null
                     }
@@ -551,12 +564,14 @@ export function Stream({
                         fontSize="$sm"
                         fontWeight="$semibold"
                     >
-                        Updating the flow rate will also result in approx. {exponentiate(claimable, -exponent).toFixed(3)} {chainCoin.symbol} being
+                        Updating the flow rate will also result in
+                        approx. {exponentiate(claimable, -exponent).toFixed(3)} {chainCoin.symbol} being
                         sent to the receiver before the new flow rate is applied.
                     </Text>
-                    <br />
+                    <br/>
                     <Text>
-                        <strong>New Flow Rate:</strong> {updateFlowFormData.flowRate} nund/sec ({exponentiate(updateFlowFormData.flowRate, -exponent).toFixed(9)} {chainCoin.symbol} / sec)
+                        <strong>New Flow Rate:</strong> {updateFlowFormData.flowRate} nund/sec
+                        ({exponentiate(updateFlowFormData.flowRate, -exponent).toFixed(9)} {chainCoin.symbol} / sec)
                         <input type="hidden" name="flowRate" value={updateFlowFormData.flowRate}/> FUND
                     </Text>
                     <Button size={"sm"}>Send</Button>
@@ -581,10 +596,12 @@ export function Stream({
                         fontSize="$sm"
                         fontWeight="$semibold"
                     >
-                        Cancelling the stream result in approx. {exponentiate(claimable, -exponent).toFixed(3)} {chainCoin.symbol} being
+                        Cancelling the stream result in
+                        approx. {exponentiate(claimable, -exponent).toFixed(3)} {chainCoin.symbol} being
                         sent to the receiver.
-                        <br />
-                        You will be refunded approx. {exponentiate(remainingDeposit, -exponent).toFixed(3)} {chainCoin.symbol}
+                        <br/>
+                        You will be refunded
+                        approx. {exponentiate(remainingDeposit, -exponent).toFixed(3)} {chainCoin.symbol}
                     </Text>
                     <Button size={"sm"}>Cancel Stream</Button>
                 </form>
@@ -602,7 +619,7 @@ export function Stream({
             >
 
                 <Box position="relative" maxWidth={"$containerSm"}>
-                    { modalContent }
+                    {modalContent}
                 </Box>
 
             </BasicModal>

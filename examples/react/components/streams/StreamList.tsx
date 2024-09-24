@@ -26,13 +26,21 @@ export type StreamsProps = {
 
 export function StreamList({chainName}: StreamsProps) {
     const {address, status: walletStatus} = useChain(chainName);
-    const {data: streamData, isLoading: isLoadingStreamData, refetch: refetchStreamData} = usePaymentStreamData(chainName);
-    const {data: balanceData, isLoading: isLoadingBalanceData, refetch: refetchBalanceData} = useQueryBalance(chainName, "nund");
+    const {
+        data: streamData,
+        isLoading: isLoadingStreamData,
+        refetch: refetchStreamData
+    } = usePaymentStreamData(chainName);
+    const {
+        data: balanceData,
+        isLoading: isLoadingBalanceData,
+        refetch: refetchBalanceData
+    } = useQueryBalance(chainName, "nund");
     const {onCalculateFlowRate} = useCalculateFlowRate(chainName);
     const {onCreateStream} = useCreateStream(chainName)
     const [isCalculated, setIsCalculated] = useState(false)
-    const { modal: statusModal, open: openStatusModal, close: closeStatusModal } = useModal("");
-    const [ modalContent, setModalContent ] = useState(<></>)
+    const {modal: statusModal, open: openStatusModal, close: closeStatusModal} = useModal("");
+    const [modalContent, setModalContent] = useState(<></>)
     const [currentAddress, setCurrentAddress] = useState<string>("")
     const [currentBalance, setCurrentBalance] = useState<any>(null)
 
@@ -69,7 +77,7 @@ export function StreamList({chainName}: StreamsProps) {
             refetchBalanceData()
         }
 
-        if(
+        if (
             address
             && !isLoadingBalanceData
         ) {
@@ -88,8 +96,8 @@ export function StreamList({chainName}: StreamsProps) {
     useEffect(() => {
         if (
             balanceData
-            && parseInt(balanceData?.balance?.amount, 10 ) > 0
-            && parseInt(balanceData?.balance?.amount, 10 ) !== parseInt(currentBalance?.balance?.amount, 10 )
+            && parseInt(balanceData?.balance?.amount, 10) > 0
+            && parseInt(balanceData?.balance?.amount, 10) !== parseInt(currentBalance?.balance?.amount, 10)
         ) {
             setCurrentBalance(balanceData)
         }
@@ -112,7 +120,7 @@ export function StreamList({chainName}: StreamsProps) {
         openStatusModal();
         const nund = exponentiate(newStreamFormData.deposit, exponent)
 
-        if(nund > parseInt(currentBalance.balance.amount, 10)) {
+        if (nund > parseInt(currentBalance.balance.amount, 10)) {
             onCreateNewStreamError("Cannot deposit more than balance")
             return
         }
@@ -164,7 +172,13 @@ export function StreamList({chainName}: StreamsProps) {
             const receiverAmount = value - validatorAmount
 
             const depositEndTime = calculateDepositEndTime(value, newStreamFormData.flowRate);
-            setNewStreamFormData({...newStreamFormData, [name]: value, depositEndTime, validatorAmount, receiverAmount});
+            setNewStreamFormData({
+                ...newStreamFormData,
+                [name]: value,
+                depositEndTime,
+                validatorAmount,
+                receiverAmount
+            });
         } else {
             setNewStreamFormData({...newStreamFormData, [name]: value});
         }
@@ -209,7 +223,7 @@ export function StreamList({chainName}: StreamsProps) {
     function onCreateNewStreamSuccess(txHash: string | undefined) {
         resetFormData()
         let output = <>{txHash}</>
-        if(explorer.tx_page !== undefined && txHash != null) {
+        if (explorer.tx_page !== undefined && txHash != null) {
             const url = explorer.tx_page.replace("${txHash}", txHash)
             output = <Link href={url} target={"_blank"}>{txHash}</Link>
         }
@@ -240,6 +254,7 @@ export function StreamList({chainName}: StreamsProps) {
             </>
         )
     }
+
     const Loading = (
         <Box
             p="$8"
@@ -267,22 +282,22 @@ export function StreamList({chainName}: StreamsProps) {
             </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
                 {streamData.streamsAsSender?.streams?.length > 0 ? streamData.streamsAsSender?.streams?.map((streamRes: {
-                sender: string;
-                receiver: string;
-                stream: StreamType;
-            }, index: any) => (
-                <Stream
-                    key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
-                    chainName={chainName}
-                    sender={streamRes.sender}
-                    receiver={streamRes.receiver}
-                    stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
-                    walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
-                    refetchStreams={refetchStreamData}
-                    refetchBalanceData={refetchBalanceData}
-                />
-            )) : <Text fontSize={"&lg"} fontWeight={"$bold"}>No streams</Text>}
+                    sender: string;
+                    receiver: string;
+                    stream: StreamType;
+                }, index: any) => (
+                    <Stream
+                        key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
+                        chainName={chainName}
+                        sender={streamRes.sender}
+                        receiver={streamRes.receiver}
+                        stream={streamRes.stream}
+                        validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
+                        walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
+                        refetchStreams={refetchStreamData}
+                        refetchBalanceData={refetchBalanceData}
+                    />
+                )) : <Text fontSize={"&lg"} fontWeight={"$bold"}>No streams</Text>}
             </Box>
         </>
     )
@@ -299,19 +314,23 @@ export function StreamList({chainName}: StreamsProps) {
                 <Button intent="tertiary" size={"sm"} onClick={handleClickRefreshButton}>Refresh</Button>
             </Stack>
             <Box display={"block"} alignItems={"center"} width={"100%"}>
-            {streamData.streamsAsReceiver?.streams?.length > 0 ? streamData.streamsAsReceiver?.streams?.map((streamRes: { sender: string; receiver: string; stream: StreamType; }, index: any) => (
-                <Stream
-                    key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
-                    chainName={chainName}
-                    sender={streamRes.sender}
-                    receiver={streamRes.receiver}
-                    stream={streamRes.stream}
-                    validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
-                    walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
-                    refetchStreams={refetchStreamData}
-                    refetchBalanceData={refetchBalanceData}
-                />
-            )) : <Text>No streams</Text> }
+                {streamData.streamsAsReceiver?.streams?.length > 0 ? streamData.streamsAsReceiver?.streams?.map((streamRes: {
+                    sender: string;
+                    receiver: string;
+                    stream: StreamType;
+                }, index: any) => (
+                    <Stream
+                        key={`${index}_${streamRes.sender}_${streamRes.receiver}`}
+                        chainName={chainName}
+                        sender={streamRes.sender}
+                        receiver={streamRes.receiver}
+                        stream={streamRes.stream}
+                        validatorFeePerc={parseFloat(streamData?.params?.validatorFee)}
+                        walletBalance={parseInt(currentBalance?.balance?.amount, 10)}
+                        refetchStreams={refetchStreamData}
+                        refetchBalanceData={refetchBalanceData}
+                    />
+                )) : <Text>No streams</Text>}
             </Box>
         </>
     )
@@ -322,8 +341,8 @@ export function StreamList({chainName}: StreamsProps) {
         <>
             <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
                 Balance: {
-                parseInt(currentBalance?.balance?.amount, 10 ) > 0 ?
-                new Intl.NumberFormat('en-GB').format( exponentiate(currentBalance?.balance?.amount, -exponent))
+                parseInt(currentBalance?.balance?.amount, 10) > 0 ?
+                    new Intl.NumberFormat('en-GB').format(exponentiate(currentBalance?.balance?.amount, -exponent))
                     : 0
             } FUND
             </Text>
@@ -332,7 +351,8 @@ export function StreamList({chainName}: StreamsProps) {
     )
 
     const createNewStreamContent = (
-        <Box mt="$8" width="100%" display="table" justifyContent={"centre"} borderRadius="$lg" backgroundColor="$cardBg" px="$4" py="$4">
+        <Box mt="$8" width="100%" display="table" justifyContent={"centre"} borderRadius="$lg" backgroundColor="$cardBg"
+             px="$4" py="$4">
             <Box mt="$8" display="table-row">
                 <Box mt="$8" display="table-cell">
                     <form onSubmit={handleInitNewStreamSubmit} className={"payment-stream-form"}>
@@ -383,18 +403,19 @@ export function StreamList({chainName}: StreamsProps) {
                                 </Text>
                                 <Text fontSize="$lg">
                                     <strong>Deposit:</strong> <input type="text" size={5} name="deposit"
-                                                    value={newStreamFormData.deposit}
-                                                    onChange={handleCreateNewStreamInputChange}/> FUND
+                                                                     value={newStreamFormData.deposit}
+                                                                     onChange={handleCreateNewStreamInputChange}/> FUND
                                 </Text>
                                 <Text fontSize="$lg">
                                     <strong>Flow Rate:</strong> {newStreamFormData.flowRate} nund/sec
                                     ({exponentiate(newStreamFormData.flowRate?.toString(), -exponent).toFixed(9)} FUND/sec)
                                 </Text>
                                 <Text fontSize="$lg">
-                                    <strong>Deposit End:</strong> {new Date(newStreamFormData.depositEndTime * 1000).toLocaleString()}
+                                    <strong>Deposit
+                                        End:</strong> {new Date(newStreamFormData.depositEndTime * 1000).toLocaleString()}
                                 </Text>
 
-                                <br />
+                                <br/>
 
                                 {streamData?.params && <Text fontSize="$sm">
                                     <strong>Note:</strong> A {parseFloat(streamData?.params?.validatorFee) * 100}%
@@ -451,7 +472,8 @@ export function StreamList({chainName}: StreamsProps) {
         <Box mb="$8" display="flex" alignItems="center" justifyContent="center">
             <Text fontSize="$lg">
                 <strong>
-                    Get TestNet FUND from the <Link href={"https://faucet-testnet.unification.io"} target={"_blank"} underline={true}>Faucet</Link>
+                    Get TestNet FUND from the <Link href={"https://faucet-testnet.unification.io"} target={"_blank"}
+                                                    underline={true}>Faucet</Link>
                 </strong>
             </Text>
         </Box>
@@ -461,7 +483,7 @@ export function StreamList({chainName}: StreamsProps) {
         <Box mb="$20" position="relative">
             {chainName === 'unificationtestnet' ? faucet : null}
 
-            {address ? balance : null }
+            {address ? balance : null}
 
             {address ? content : connect}
 
@@ -477,7 +499,7 @@ export function StreamList({chainName}: StreamsProps) {
             >
 
                 <Box position="relative" maxWidth={"$containerSm"}>
-                    { modalContent }
+                    {modalContent}
                 </Box>
 
             </BasicModal>
