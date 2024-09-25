@@ -59,6 +59,12 @@ const unificationDevnet: Chain = {
                 provider: "Unification"
             }
         ],
+        wss: [
+            {
+                address: "ws://localhost:26657/websocket",
+                provider: "Unification"
+            }
+        ],
         rest: [
             {
                 address: "http://localhost:1317",
