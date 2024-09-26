@@ -1,51 +1,55 @@
-import { useState } from 'react';
-import { useRpcQueryClient } from '.';
-import {toast} from "@interchain-ui/react";
+import { useState } from "react";
+import { useRpcQueryClient } from ".";
+import { toast } from "@interchain-ui/react";
 
 (BigInt.prototype as any).toJSON = function () {
-    return this.toString();
+  return this.toString();
 };
 
-export type onCalculateFlowRateOptions = {
-    coin: string;
-    period: number;
-    duration: number;
-    success?: (flowRate: string) => void
-    error?: () => void
-}
+export type CalculateFlowRateOptions = {
+  coin: string;
+  period: number;
+  duration: number;
+  success?: (flowRate: string) => void;
+  error?: () => void;
+};
 
 export function useCalculateFlowRate(chainName: string) {
-    const {rpcQueryClient} = useRpcQueryClient(chainName);
-    const [isCalculating, setIsCalculating] = useState(false);
+  const { rpcQueryClient } = useRpcQueryClient(chainName);
+  const [isCalculating, setIsCalculating] = useState(false);
 
-    async function onCalculateFlowRate({ coin, period, duration, success = (flowRate) => { }, error = () => { } }: onCalculateFlowRateOptions) {
+  async function onCalculateFlowRate({
+    coin,
+    period,
+    duration,
+    success = () => {},
+    error = () => {},
+  }: CalculateFlowRateOptions) {
+    setIsCalculating(true);
+    try {
+      const res = await rpcQueryClient?.mainchain.stream.v1.calculateFlowRate({
+        coin,
+        period,
+        duration: BigInt(duration),
+      });
 
-        try {
-            setIsCalculating(true)
-            const res = await rpcQueryClient?.mainchain.stream.v1.calculateFlowRate(
-                {
-                    coin, period, duration: BigInt(duration),
-                }
-            )
+      if (!res?.flowRate) {
+        console.error(res);
+        toast.error("Error calculating flow rate");
+        error();
+        return;
+      }
 
-            if (!res?.flowRate) {
-                error();
-                console.error(res);
-                toast.error('Error calculating flow rate');
-            } else {
-                success(res.flowRate.toString());
-                toast.success('Calculate Flow Rate successful');
-            }
-        } catch (e) {
-            error();
-            console.error(e);
-            toast.error('Calculate fLow rate failed');
-        } finally {
-            setIsCalculating(false);
-        }
-
+      success(res.flowRate.toString());
+      toast.success("Calculate Flow Rate successful");
+    } catch (e) {
+      console.error(e);
+      toast.error("Calculate Flow Rate failed");
+      error();
+    } finally {
+      setIsCalculating(false);
     }
+  }
 
-    return { isCalculating, onCalculateFlowRate }
-
+  return { isCalculating, onCalculateFlowRate };
 }

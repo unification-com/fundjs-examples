@@ -67,36 +67,37 @@ export function Wallet({
     }
   }, []);
   return (
-    <Box py="$16">
+    <Box pt="$16" pb="$8">
       <Box mx="auto" maxWidth="28rem" attributes={{ mb: "$2" }}>
-          {
-          chains.length > 1 ?
+        {chains.length > 1 ? (
           <ChainSelect
-          chains={chains}
-          chainName={chain.chain_name}
-          onChange={handleChainChange}
-        /> : null}
+            chains={chains}
+            chainName={chain.chain_name}
+            onChange={handleChainChange}
+          />
+        ) : null}
       </Box>
       <Stack
         direction="vertical"
         attributes={{
           mx: "auto",
+          mt: "$4",
           px: "$8",
           py: "$1",
-          maxWidth: "21rem",
+          maxWidth: "22rem",
           borderRadius: "$lg",
           justifyContent: "center",
-          backgroundColor: useColorModeValue("$white", "$blackAlpha500"),
+          backgroundColor: useColorModeValue("#fff", "#1D2024"),
           boxShadow: useColorModeValue(
             "0 0 2px #dfdfdf, 0 0 6px -2px #d3d3d3",
-            "0 0 2px #363636, 0 0 8px -2px #4f4f4f",
+            "0 0 2px #363636, 0 0 8px -2px #4f4f4f"
           ),
         }}
       >
         {username ? <User name={username} /> : null}
-        {address
-          ? <ClipboardCopyText text={address} truncate="middle" />
-          : null}
+        {address ? (
+          <ClipboardCopyText text={address} truncate="middle" />
+        ) : null}
         <Box
           my="$8"
           flex="1"
@@ -111,9 +112,9 @@ export function Wallet({
         </Box>
 
         {message &&
-            [WalletStatus.Error, WalletStatus.Rejected].includes(status)
-          ? <Warning text={`${wallet?.prettyName}: ${message}`} />
-          : null}
+        [WalletStatus.Error, WalletStatus.Rejected].includes(status) ? (
+          <Warning text={`${wallet?.prettyName}: ${message}`} />
+        ) : null}
       </Stack>
     </Box>
   );
