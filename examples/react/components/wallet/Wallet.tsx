@@ -87,7 +87,8 @@ export function Wallet({
           maxWidth: "22rem",
           borderRadius: "$lg",
           justifyContent: "center",
-          backgroundColor: useColorModeValue("#fff", "#1D2024"),
+          // backgroundColor: useColorModeValue("#F5F7FB", "#0F172A"),
+          backgroundColor: "$cardBg",
           boxShadow: useColorModeValue(
             "0 0 2px #dfdfdf, 0 0 6px -2px #d3d3d3",
             "0 0 2px #363636, 0 0 8px -2px #4f4f4f"

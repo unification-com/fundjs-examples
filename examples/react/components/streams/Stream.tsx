@@ -477,6 +477,7 @@ export function Stream({
       width="70%"
       display="table"
       borderRadius="$lg"
+      // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
       backgroundColor="$cardBg"
       px="$4"
       py="$4"
@@ -574,7 +575,6 @@ export function Stream({
           </Box>
         </Box>
       </Box>
-
       <Box mt="$8" display="table-row">
         <Box mt="$8" display="table-cell"></Box>
       </Box>
@@ -854,7 +854,16 @@ export function Stream({
             />{" "}
             FUND
           </Text>
-          <Button size={"sm"}>Send</Button>
+          <Box
+            mb="$1"
+            display={"flex"}
+            alignItems={"center"}
+            justifyContent={"end"}
+          >
+            <Button variant="outlined" size={"sm"}>
+              Send
+            </Button>
+          </Box>
         </form>
       </BasicModal>
 
@@ -889,9 +898,7 @@ export function Stream({
             alignItems={"center"}
             justifyContent={"end"}
           >
-            <Button intent="danger" size={"sm"}>
-              Cancel Stream
-            </Button>
+            <Button size={"sm"}>Cancel Stream</Button>
           </Box>
         </form>
       </BasicModal>

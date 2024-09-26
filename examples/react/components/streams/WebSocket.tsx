@@ -9,7 +9,14 @@ import {
   getCoin,
   getExponent,
 } from "@/utils";
-import { Box, Text, Stack, ListItem, Link } from "@interchain-ui/react";
+import {
+  Box,
+  Text,
+  Stack,
+  ListItem,
+  Link,
+  useColorModeValue,
+} from "@interchain-ui/react";
 import { useChain } from "@cosmos-kit/react";
 import { parseCoins } from "@cosmjs/stargate";
 
@@ -313,7 +320,13 @@ export const WebSocket = ({ chainName }: WebSocketProps) => {
   }[readyState];
 
   return (
-    <Box borderRadius="$lg" backgroundColor="$cardBg" px="$4" py="$4">
+    <Box
+      borderRadius="$lg"
+      // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
+      backgroundColor="$cardBg"
+      px="$4"
+      py="$4"
+    >
       <Text fontSize={"$lg"} fontWeight={"$bold"}>
         Websocket events for {address} Payment Streams
       </Text>

@@ -429,6 +429,7 @@ export function StreamList({ chainName }: StreamsProps) {
         display="table"
         justifyContent={"center"}
         borderRadius="$lg"
+        // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
         backgroundColor="$cardBg"
         px="$4"
         py="$4"
