@@ -324,8 +324,9 @@ export const WebSocket = ({ chainName }: WebSocketProps) => {
       borderRadius="$lg"
       // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
       backgroundColor="$cardBg"
-      px="$4"
-      py="$4"
+      px="$10"
+      pt="$4"
+      pb="$2"
     >
       <Text fontSize={"$lg"} fontWeight={"$bold"}>
         Websocket events for {address} Payment Streams

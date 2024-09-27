@@ -186,6 +186,7 @@ export function StreamList({ chainName }: StreamsProps) {
         ...prevState,
         period: selectedItem.key,
       }));
+
       setselectedlabel(selectedItem.label);
     }
   };
@@ -401,20 +402,21 @@ export function StreamList({ chainName }: StreamsProps) {
   );
 
   // @ts-ignore
-  const balance = (
-    <>
-      <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
-        Balance:{" "}
-        {parseInt(currentBalance?.balance?.amount, 10) > 0
-          ? new Intl.NumberFormat("en-GB").format(
-              exponentiate(currentBalance?.balance?.amount, -exponent)
-            )
-          : 0}{" "}
-        FUND
-      </Text>
-    </>
-  );
-
+  // const balance = (
+  //   <>
+  //     <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
+  //       Balance:{" "}
+  //       {parseInt(currentBalance?.balance?.amount, 10) > 0
+  //         ? new Intl.NumberFormat("en-GB").format(
+  //             exponentiate(currentBalance?.balance?.amount, -exponent)
+  //           )
+  //         : 0}{" "}
+  //       FUND
+  //     </Text>
+  //   </>
+  // );
+  const textColor = useColorModeValue("#000", "#fff");
+  const bgColor = useColorModeValue("#fff", "#0F172A");
   const createNewStreamContent = (
     <Box
       display={"flex"}
@@ -446,98 +448,107 @@ export function StreamList({ chainName }: StreamsProps) {
                 </Text>
               </Box>
               <Box
-                display={"flex"}
-                justifyContent={"start"}
-                alignItems={"start"}
-                gap={!isCalculated ? "20px" : ""}
-                flexDirection={isCalculated ? "column" : "row"}
+                display="flex"
+                justifyContent="space-between"
+                gap="20px"
+                flexWrap={"wrap"}
               >
-                <Box mb="$1">
-                  <TextField
-                    id="fund"
-                    type="text"
-                    name="fund"
-                    value={initStreamFormData.fund}
-                    onChange={handleInitNewStreamInputChange}
-                    label="Fund Amount"
-                    placeholder="Enter Fund Amount"
-                  />
-                </Box>
                 <Box
                   display={"flex"}
-                  alignItems={"center"}
                   justifyContent={"start"}
-                  gap={"4px"}
+                  alignItems={"start"}
+                  gap={!isCalculated ? "20px" : ""}
+                  flexDirection={isCalculated ? "column" : "row"}
+                  flexWrap={"wrap"}
                 >
                   <Box mb="$1">
                     <TextField
-                      id="duration"
+                      id="fund"
                       type="text"
-                      name="duration"
-                      value={initStreamFormData.duration || "1"}
+                      name="fund"
+                      value={initStreamFormData.fund}
                       onChange={handleInitNewStreamInputChange}
-                      label={`Every ${
-                        initStreamFormData.duration || "1"
-                      } ${selectedlabel}`}
-                      inputClassName="inputBox"
-                      placeholder="Enter Duration"
+                      label="Fund Amount"
+                      placeholder="Enter Fund Amount"
                     />
                   </Box>
-                  <Box mt="$11">
-                    <Select
-                      id="period"
-                      placeholder="Select Period"
-                      onSelectItem={(item) => handleSelectChange(item)}
-                      size="sm"
-                      optionsWidth="300px"
-                      defaultSelectedItem={{
-                        key: `${initStreamFormData.duration}`,
-                        label: `Hour${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`,
-                        index: 3,
-                      }}
-                    >
-                      <SelectOption
-                        optionKey="2"
-                        label={`Minute${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
+                  <Box
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"start"}
+                    gap={"4px"}
+                  >
+                    <Box mb="$1">
+                      <TextField
+                        id="duration"
+                        type="text"
+                        name="duration"
+                        value={initStreamFormData.duration || "1"}
+                        onChange={handleInitNewStreamInputChange}
+                        label={`Every ${
+                          initStreamFormData.duration || "1"
+                        } ${selectedlabel}`}
+                        inputClassName="inputBox"
+                        placeholder="Enter Duration"
                       />
-                      <SelectOption
-                        optionKey="3"
-                        label={`Hour${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
-                      />
-                      <SelectOption
-                        optionKey="4"
-                        label={`Day${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
-                      />
-                      <SelectOption
-                        optionKey="5"
-                        label={`Week${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
-                      />
-                      <SelectOption
-                        optionKey="6"
-                        label={`Month${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
-                      />
-                      <SelectOption
-                        optionKey="7"
-                        label={`Year${
-                          initStreamFormData.duration > "1" ? "s" : ""
-                        }`}
-                      />
-                    </Select>
+                    </Box>
+                    <Box mt="$11">
+                      <Select
+                        id="period"
+                        placeholder="Select Period"
+                        onSelectItem={(item) => handleSelectChange(item)}
+                        size="sm"
+                        optionsWidth="300px"
+                        defaultSelectedItem={{
+                          key: `${initStreamFormData.duration}`,
+                          label: `Month${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`,
+                          index: 4,
+                        }}
+                      >
+                        <SelectOption
+                          optionKey="2"
+                          label={`Minute${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                        <SelectOption
+                          optionKey="3"
+                          label={`Hour${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                        <SelectOption
+                          optionKey="4"
+                          label={`Day${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                        <SelectOption
+                          optionKey="5"
+                          label={`Week${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                        <SelectOption
+                          optionKey="6"
+                          label={`Month${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                        <SelectOption
+                          optionKey="7"
+                          label={`Year${
+                            initStreamFormData.duration > "1" ? "s" : ""
+                          }`}
+                        />
+                      </Select>
+                    </Box>
                   </Box>
                 </Box>
-                <Box width={"200px"} mb="$3">
+
+                <Box mb="$3" flexGrow={1}>
                   <TextField
                     id="receiver"
                     type="text"
@@ -550,14 +561,16 @@ export function StreamList({ chainName }: StreamsProps) {
                   />
                 </Box>
               </Box>
+
               <Box
                 mb="$1"
+                mt="$10"
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"end"}
                 width={isCalculated ? "223px" : ""}
               >
-                <Button variant="outlined" intent="secondary">
+                <Button variant="solid" intent="success">
                   Calculate
                 </Button>
               </Box>
@@ -568,14 +581,18 @@ export function StreamList({ chainName }: StreamsProps) {
               <form
                 onSubmit={handleCreateNewStreamSubmit}
                 className={"payment-stream-form"}
+                style={{
+                  border: "1px solid #979797",
+                  borderRadius: "6px",
+                }}
               >
                 <Text fontSize="$lg" fontWeight="$bold">
                   2. Verify the following, then click Create
                 </Text>
-                <Text fontSize="$lg">
+                <Text fontSize="$md">
                   <strong>Receiver:</strong> {newStreamFormData.receiver}
                 </Text>
-                <Text fontSize="$lg">
+                <Text fontSize="$md">
                   <strong>Deposit:</strong>{" "}
                   <input
                     type="text"
@@ -589,11 +606,13 @@ export function StreamList({ chainName }: StreamsProps) {
                       borderRadius: "4px",
                       border: "1px solid #ccc",
                       width: "100px",
+                      color: textColor,
+                      backgroundColor: bgColor,
                     }}
                   />{" "}
                   FUND
                 </Text>
-                <Text fontSize="$lg">
+                <Text fontSize="$md">
                   <strong>Flow Rate:</strong> {newStreamFormData.flowRate}{" "}
                   nund/sec (
                   {exponentiate(
@@ -602,20 +621,28 @@ export function StreamList({ chainName }: StreamsProps) {
                   ).toFixed(9)}{" "}
                   FUND/sec)
                 </Text>
-                <Text fontSize="$lg">
+                <Text fontSize="$md">
                   <strong>Deposit End:</strong>{" "}
                   {new Date(
                     newStreamFormData.depositEndTime * 1000
                   ).toLocaleString("en-GB")}
                 </Text>
-                <br />
+
                 {streamData?.params && (
                   <Text fontSize="$sm">
-                    <strong>Note:</strong> A{" "}
-                    {parseFloat(streamData?.params?.validatorFee) * 100}%
-                    Validator fee will automatically be deducted each time a
-                    claim is made.
-                    <br />
+                    <Box
+                      backgroundColor="#fac9ff"
+                      p="$2"
+                      color={"#000"}
+                      borderRadius={"$md"}
+                      mb="$3"
+                      mt={"$3"}
+                    >
+                      <strong>Note:</strong> A{" "}
+                      {parseFloat(streamData?.params?.validatorFee) * 100}%
+                      Validator fee will automatically be deducted each time a
+                      claim is made.
+                    </Box>
                     Receiver Amount:{" "}
                     {new Intl.NumberFormat("en-GB").format(
                       newStreamFormData.receiverAmount
@@ -701,8 +728,8 @@ export function StreamList({ chainName }: StreamsProps) {
   );
 
   const faucet = (
-    <Box mb="$8" display="flex" alignItems="center" justifyContent="center">
-      <Text fontSize="$lg">
+    <Box mb="$8" display="flex" alignItems="center">
+      <Text fontSize="$md">
         <strong>
           Get TestNet FUND from the{" "}
           <Link
@@ -720,7 +747,7 @@ export function StreamList({ chainName }: StreamsProps) {
   return (
     <Box mb="$10" position="relative">
       {chainName === "unificationtestnet" ? faucet : null}
-      <Box mb="$8">{address ? balance : null}</Box>
+      {/* <Box mb="$8">{address ? balance : null}</Box> */}
       {address ? content : connect}
       <BasicModal
         title={

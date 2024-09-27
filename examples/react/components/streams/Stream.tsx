@@ -145,19 +145,34 @@ export function Stream({
           {chainCoin.symbol}
         </Text>
 
-        <Text fontSize="$sm">
+        <Box
+          backgroundColor="#fac9ff"
+          color={"#000"}
+          p="$2"
+          fontSize="$sm"
+          borderRadius={"$md"}
+          mb="$3"
+          mt={"$3"}
+        >
           Note - actual amount is calculated on-chain at the block time the
           transaction is processed
-        </Text>
+        </Box>
 
         <Text fontSize="$lg">
-          <strong>You will receive approx.:</strong>{" "}
+          <strong style={{ marginRight: "20px" }}>
+            You will receive approx.:
+          </strong>{" "}
           {exponentiate(actualReceive, -exponent).toFixed(3)} {chainCoin.symbol}
         </Text>
-        <Text fontSize="$lg">
-          <strong>{validatorFeePerc * 100}% Validator Fee approx.:</strong>{" "}
-          {exponentiate(validatorFee, -exponent).toFixed(3)} {chainCoin.symbol}
-        </Text>
+        <Box mb="$3" mt={"$3"}>
+          <Text fontSize="$lg">
+            <strong style={{ marginRight: "10px" }}>
+              {validatorFeePerc * 100}% Validator Fee approx.:
+            </strong>{" "}
+            {exponentiate(validatorFee, -exponent).toFixed(3)}{" "}
+            {chainCoin.symbol}
+          </Text>
+        </Box>
         <Text fontSize="$lg">
           <Spinner size="$5xl" /> Sending transaction
         </Text>
@@ -430,7 +445,12 @@ export function Stream({
   const exponent = getExponent(chainName);
 
   const claim = (
-    <Button intent="primary" size={"sm"} onClick={handleClaimSubmit}>
+    <Button
+      intent="primary"
+      size={"sm"}
+      onClick={handleClaimSubmit}
+      className="claim-btm"
+    >
       Claim
     </Button>
   );
@@ -474,18 +494,18 @@ export function Stream({
   return (
     <Box
       mt="$8"
-      width="70%"
+      width="100%"
       display="table"
       borderRadius="$lg"
       // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
       backgroundColor="$cardBg"
-      px="$4"
-      py="$4"
+      px="$10"
+      py="$8"
     >
       <Box mt="$8" display="table-row">
         <Box mt="$8" display="table-cell">
           <Box mt="$8" display="table-row">
-            <Box mt="$8" display="table-cell" width={4}>
+            <Box display="table-cell" width="200px" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
                 {isSender ? "To" : "From"}:
               </Text>
@@ -497,7 +517,7 @@ export function Stream({
             </Box>
           </Box>
           <Box mt="$8" display="table-row">
-            <Box mt="$8" display="table-cell">
+            <Box mt="$8" display="table-cell" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
                 Flow Rate:
               </Text>
@@ -513,7 +533,7 @@ export function Stream({
             </Box>
           </Box>
           <Box mt="$8" display="table-row">
-            <Box mt="$8" display="table-cell">
+            <Box mt="$8" display="table-cell" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
                 Deposit:
               </Text>
@@ -529,7 +549,7 @@ export function Stream({
             </Box>
           </Box>
           <Box mt="$8" display="table-row">
-            <Box mt="$8" display="table-cell">
+            <Box mt="$8" display="table-cell" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
                 Deposit Zero Time:
               </Text>
@@ -541,7 +561,7 @@ export function Stream({
             </Box>
           </Box>
           <Box mt="$8" display="table-row">
-            <Box mt="$8" display="table-cell">
+            <Box mt="$8" display="table-cell" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
                 Last Claim Time:
               </Text>
@@ -567,11 +587,15 @@ export function Stream({
           </Box>
         </Box>
 
-        <Box mt="$8" display="table-cell">
+        <Box
+          mt="$8"
+          pr="$5"
+          display="table-cell"
+          verticalAlign={isSender ? "middle" : "bottom"}
+          width={isSender ? "130px" : "130px"}
+        >
           <Box mt="$8" display="table-cell">
-            <Text fontSize="$sm" fontWeight="$bold">
-              {isSender ? editButtons : claim}
-            </Text>
+            {isSender ? editButtons : claim}
           </Box>
         </Box>
       </Box>
@@ -629,12 +653,13 @@ export function Stream({
             </Box>
           ) : null}
           <Box
+            mt="$4"
             mb="$1"
             display={"flex"}
             alignItems={"center"}
             justifyContent={"end"}
           >
-            <Button variant="outlined" size={"sm"} intent="secondary">
+            <Button size={"sm"} intent="tertiary">
               Top Up
             </Button>
           </Box>
@@ -813,7 +838,7 @@ export function Stream({
             alignItems={"center"}
             justifyContent={"end"}
           >
-            <Button size={"sm"} variant="outlined" intent="secondary">
+            <Button size={"sm"} intent="tertiary">
               Calculate
             </Button>
           </Box>
