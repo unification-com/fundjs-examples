@@ -8,7 +8,6 @@ import {
   useColorModeValue,
 } from "@interchain-ui/react";
 import { dependencies } from "@/config";
-import { IoIosLink } from "react-icons/io";
 
 const stacks = ["Cosmos Kit", "Next.js", "fundjs"];
 
@@ -43,12 +42,12 @@ export function Header() {
         justifyContent={"center"}
         gap={"10px"}
       >
-        <Box>
-          <IoIosLink
+        {/* <Box>
+          <TbTransferIn
             color={useColorModeValue("#2C3137", "#fff")}
             size={"35px"}
           />
-        </Box>
+        </Box> */}
         <Box>
           <Text
             as="h1"
