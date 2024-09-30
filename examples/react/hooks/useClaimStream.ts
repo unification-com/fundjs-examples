@@ -1,80 +1,81 @@
-import {useState} from 'react';
-import {mainchain} from '@unification-com/fundjs-react';
-import {toast} from '@interchain-ui/react';
-import {useChain} from '@cosmos-kit/react';
-import {coins, StdFee, parseCoins, Coin} from '@cosmjs/stargate';
-import {useTx} from '@/hooks';
-import {getCoin} from '@/utils';
+import { useState } from "react";
+import { mainchain } from "@unification-com/fundjs-react";
+import { toast } from "@interchain-ui/react";
+import { useChain } from "@cosmos-kit/react";
+import { coins, StdFee, parseCoins, Coin } from "@cosmjs/stargate";
+import { useTx } from "@/hooks";
+import { getCoin } from "@/utils";
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
 
-export type onClaimStreamOptions = {
-    sender: string;
-    success?: (remaining: Coin, txHash: string | undefined) => void
-    error?: (errMsg: string) => void
-}
+export type ClaimStreamOptions = {
+  sender: string;
+  success?: (remaining: Coin, txHash: string | undefined) => void;
+  error?: (errMsg: string) => void;
+};
 
 export function useClaimStream(chainName: string) {
-    const {tx} = useTx(chainName);
-    const {address} = useChain(chainName);
-    const [isClaiming, setIsClaiming] = useState(false);
+  const { tx } = useTx(chainName);
+  const { address } = useChain(chainName);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const chainCoin = getCoin(chainName);
 
-    const chainCoin = getCoin(chainName);
-
-    async function onClaimStream({
-                                     sender, success = (remaining, txHash: string | undefined) => {
-        }, error = (errMsg: string) => {
-        }
-                                 }: onClaimStreamOptions) {
-        if (!address) return;
-
-        const msg = MessageComposer.withTypeUrl.claimStream({
-            sender,
-            receiver: address,
-        });
-
-        const fee: StdFee = {
-            amount: coins('1000', chainCoin.base),
-            gas: '1000000',
-        };
-
-        try {
-            setIsClaiming(true);
-            const res = await tx([msg], {fee});
-            if (res.error) {
-                error(res.errorMsg);
-                console.error(res.error);
-                toast.error(res.errorMsg);
-            } else {
-                const remainingCoins = parseCoins("0nund")
-                let remaining = remainingCoins[0]
-                if (res.response?.events) {
-                    for (let i = 0; i < res.response?.events.length; i += 1) {
-                        const e = res.response?.events[i]
-                        if (e?.type === "claim_stream") {
-                            for (let j = 0; j < e.attributes.length; j += 1) {
-                                const a = e.attributes[j]
-                                if (a.key === "remaining_deposit") {
-                                    const c = parseCoins(a.value)
-                                    remaining = c[0]
-                                }
-                            }
-                        }
-                    }
-                }
-                const txHash = res?.response?.transactionHash
-                success(remaining, txHash);
-                toast.success('Claim Stream successful');
-            }
-        } catch (e) {
-            // @ts-ignore
-            error(e.error);
-            console.error(e);
-            toast.error('Claim Stream failed');
-        } finally {
-            setIsClaiming(false);
-        }
+  async function onClaimStream({
+    sender,
+    success = () => {},
+    error = () => {},
+  }: ClaimStreamOptions) {
+    if (!address) {
+      error("Address not available");
+      return;
     }
 
-    return {isClaiming, onClaimStream}
+    const msg = MessageComposer.withTypeUrl.claimStream({
+      sender,
+      receiver: address,
+    });
+
+    const fee: StdFee = {
+      amount: coins("1000", chainCoin.base),
+      gas: "1000000",
+    };
+
+    try {
+      setIsClaiming(true);
+      const res = await tx([msg], { fee });
+
+      if (res.error) {
+        const errMsg = res.errorMsg || "Transaction failed";
+        error(errMsg);
+        console.error(errMsg);
+        toast.error(errMsg);
+        return;
+      }
+
+      let remaining = parseCoins("0nund")[0];
+
+      res.response?.events?.forEach((event) => {
+        if (event.type === "claim_stream") {
+          event.attributes.forEach((attribute) => {
+            if (attribute.key === "remaining_deposit") {
+              remaining = parseCoins(attribute.value)[0];
+            }
+          });
+        }
+      });
+
+      const txHash = res.response?.transactionHash;
+      success(remaining, txHash);
+      toast.success("Claim Stream successful");
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : "Claim Stream failed";
+      error(errMsg);
+      console.error(e);
+      toast.error(errMsg);
+    } finally {
+      setIsClaiming(false);
+    }
+  }
+
+  return { isClaiming, onClaimStream };
 }
