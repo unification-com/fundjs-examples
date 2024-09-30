@@ -96,6 +96,7 @@ export function Wallet({
     ) {
       setCurrentBalance(balanceData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [balanceData]);
   useEffect(() => {
     const selected = localStorage.getItem(CHAIN_NAME_STORAGE_KEY);
