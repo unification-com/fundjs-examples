@@ -146,10 +146,10 @@
   resolved "https://registry.npmjs.org/@chain-registry/types/-/types-0.45.76.tgz"
   integrity sha512-dmDu946vWGzx5kHDbLkLYie/vKIn0zR/+evbUAJzTQQ30n73Dit8bGPhZuhEnYd4bGKzRSXKnQnT7HBd7vwO2A==
 
-"@chain-registry/types@^0.45.70":
-  version "0.45.76"
-  resolved "https://registry.npmjs.org/@chain-registry/types/-/types-0.45.76.tgz"
-  integrity sha512-dmDu946vWGzx5kHDbLkLYie/vKIn0zR/+evbUAJzTQQ30n73Dit8bGPhZuhEnYd4bGKzRSXKnQnT7HBd7vwO2A==
+"@chain-registry/types@^0.45.82":
+  version "0.45.85"
+  resolved "https://registry.npmjs.org/@chain-registry/types/-/types-0.45.85.tgz"
+  integrity sha512-UiO8ABvbe0TkQepZjpZL0Ii84lFjcU/6wKnO2zMFKhmt61TEH5+WO30qTnj0YNUK8r32rQU29/psA4WH82YCvA==
 
 "@chain-registry/types@>= 0.17", "@chain-registry/types@0.45.65":
   version "0.45.65"
@@ -4290,12 +4290,12 @@ ccount@^2.0.0:
   resolved "https://registry.npmjs.org/ccount/-/ccount-2.0.1.tgz"
   integrity sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==
 
-chain-registry@1.63.87:
-  version "1.63.87"
-  resolved "https://registry.npmjs.org/chain-registry/-/chain-registry-1.63.87.tgz"
-  integrity sha512-aqReYqGU3oAKmimD4T7rBeYm405DCYyz6dWkXHqAbZxA40zX4+IOia4HbV7hbi7GoiiJ+VnAWoLJX/OU0LrocA==
+chain-registry@^1.63.102:
+  version "1.63.102"
+  resolved "https://registry.npmjs.org/chain-registry/-/chain-registry-1.63.102.tgz"
+  integrity sha512-ktWywaoQRhAXncoW6+RFt8NjznqHKATTPlRdyt08ZwoUB+XCezGDCs+35IzeIf2I82LRUxrtulvXNm3f9nn07g==
   dependencies:
-    "@chain-registry/types" "^0.45.70"
+    "@chain-registry/types" "^0.45.82"
 
 chalk@^2.4.2:
   version "2.4.2"
