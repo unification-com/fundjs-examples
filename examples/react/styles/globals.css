@@ -32,7 +32,7 @@ a {
 
 .payment-stream-form {
   /* Form outline */
-  padding: 1em;
+  padding: 1em 0;
 }
 
 .payment-stream-form ul {
@@ -48,12 +48,14 @@ a {
 .payment-stream-form label {
   /* Uniform size & alignment */
   display: inline-block;
-  min-width: 90px;
-  text-align: right;
+  text-align: left;
+  text-wrap: nowrap;
+  max-width: 200px;
 }
 
 .payment-stream-form input,
-textarea, select {
+textarea,
+select {
   /* To make sure that all text fields have the same font settings
      By default, textareas have a monospace font */
   font: 1em sans-serif;
@@ -63,9 +65,12 @@ textarea, select {
   /* Match form field borders */
   border: 1px solid #999;
   border-radius: 0.3em;
-  margin: 0.3em;
+  /* margin: 0.3em; */
+  text-overflow: ellipsis;
 }
-
+.claim-btm {
+  width: 130px;
+}
 .payment-stream-form input:focus,
 textarea:focus {
   /* Additional highlight for focused elements */
@@ -84,7 +89,11 @@ textarea:focus {
      between the labels and their text fields */
   margin-left: 0.5em;
   border-radius: 0.3em;
-  border: 1px solid #555;
-  background-color: #999;
-  color: white;
+  border: 1px solid #999;
+  /* background-color: #999; */
+  /* color: white; */
+}
+
+.inputBox {
+  max-width: 100px;
 }

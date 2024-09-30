@@ -1,80 +1,98 @@
-import {useState} from 'react';
-import {mainchain} from '@unification-com/fundjs-react';
-import {toast} from '@interchain-ui/react';
-import {useChain} from '@cosmos-kit/react';
-import {coins, StdFee, coin} from '@cosmjs/stargate';
-import {useTx} from '@/hooks';
-import {getCoin} from '@/utils';
+import { useState } from "react";
+import { mainchain } from "@unification-com/fundjs-react";
+import { toast } from "@interchain-ui/react";
+import { useChain } from "@cosmos-kit/react";
+import { coins, StdFee, coin } from "@cosmjs/stargate";
+import { useTx } from "@/hooks";
+import { getCoin } from "@/utils";
 
 const MessageComposer = mainchain.stream.v1.MessageComposer;
 
-export type onTopUpDepositOptions = {
-    receiver: string;
-    deposit: number;
-    success?: (depositZeroTime: string, txHash: string | undefined) => void
-    error?: (errMsg: string) => void
-}
+export type TopUpDepositOptions = {
+  receiver: string;
+  deposit: number;
+  success?: (depositZeroTime: string, txHash: string | undefined) => void;
+  error?: (errMsg: string) => void;
+};
 
 export function useTopUpDeposit(chainName: string) {
-    const {tx} = useTx(chainName);
-    const {address} = useChain(chainName);
-    const [isToppingUp, setIsToppingUp] = useState(false);
+  const { tx } = useTx(chainName);
+  const { address } = useChain(chainName);
+  const [isToppingUp, setIsToppingUp] = useState(false);
+  const chainCoin = getCoin(chainName);
 
-    const chainCoin = getCoin(chainName);
+  const onTopUpDeposit = async ({
+    receiver,
+    deposit,
+    success = () => {},
+    error = () => {},
+  }: TopUpDepositOptions) => {
+    if (!address) return;
 
-    async function onTopUpDeposit({
-                                      receiver, deposit, success = (depositZeroTime, txHash: string | undefined) => {
-        }, error = (errMsg: string) => {
-        }
-                                  }: onTopUpDepositOptions) {
-        if (!address) return;
+    const msg = MessageComposer.withTypeUrl.topUpDeposit({
+      receiver,
+      sender: address,
+      deposit: coin(deposit, chainCoin.base),
+    });
 
-        const msg = MessageComposer.withTypeUrl.topUpDeposit({
-            receiver,
-            sender: address,
-            deposit: coin(deposit, chainCoin.base),
-        });
+    const fee: StdFee = {
+      amount: coins("1000", chainCoin.base),
+      gas: "1000000",
+    };
 
-        const fee: StdFee = {
-            amount: coins('1000', chainCoin.base),
-            gas: '1000000',
-        };
+    setIsToppingUp(true);
+    try {
+      const res = await tx([msg], { fee });
+      handleResponse(res, success, error);
+    } catch (e) {
+      handleError(e, error);
+    } finally {
+      setIsToppingUp(false);
+    }
+  };
 
-        try {
-            setIsToppingUp(true);
-            const res = await tx([msg], {fee});
-            if (res.error) {
-                error(res.errorMsg);
-                console.error(res.error);
-                toast.error(res.errorMsg);
-            } else {
-                let depositZeroTime = '';
-                if (res.response?.events) {
-                    for (let i = 0; i < res.response?.events.length; i += 1) {
-                        const e = res.response?.events[i]
-                        if (e?.type === "stream_deposit") {
-                            for (let j = 0; j < e.attributes.length; j += 1) {
-                                const a = e.attributes[j]
-                                if (a.key === "deposit_zero_time") {
-                                    depositZeroTime = a.value
-                                }
-                            }
-                        }
-                    }
-                }
-                const txHash = res?.response?.transactionHash
-                success(depositZeroTime, txHash);
-                toast.success('Top up deposit successful');
-            }
-        } catch (e) {
-            // @ts-ignore
-            error(e.error);
-            console.error(e);
-            toast.error('Top up deposit failed');
-        } finally {
-            setIsToppingUp(false);
-        }
+  const handleResponse = (
+    res: any,
+    success: TopUpDepositOptions["success"],
+    error: TopUpDepositOptions["error"]
+  ) => {
+    if (res.error) {
+      error(res.errorMsg);
+      console.error(res.error);
+      toast.error(res.errorMsg);
+      return;
     }
 
-    return {isToppingUp, onTopUpDeposit}
+    const depositZeroTime = extractDepositZeroTime(res.response?.events);
+    const txHash = res.response?.transactionHash;
+    success(depositZeroTime, txHash);
+    toast.success("Top up deposit successful");
+  };
+
+  const extractDepositZeroTime = (events: any[]) => {
+    if (!events) return "";
+
+    for (const event of events) {
+      if (event?.type === "stream_deposit") {
+        for (const attribute of event.attributes) {
+          if (attribute.key === "deposit_zero_time") {
+            return attribute.value;
+          }
+        }
+      }
+    }
+    return "";
+  };
+
+  const handleError = (
+    error: any,
+    errorCallback: TopUpDepositOptions["error"]
+  ) => {
+    // @ts-ignore
+    errorCallback(error?.error);
+    console.error(error);
+    toast.error("Top up deposit failed");
+  };
+
+  return { isToppingUp, onTopUpDeposit };
 }
