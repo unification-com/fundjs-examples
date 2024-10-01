@@ -57,7 +57,9 @@ export function useTopUpDeposit(chainName: string) {
     error: TopUpDepositOptions["error"]
   ) => {
     if (res.error) {
-      error(res.errorMsg);
+      if (error) {
+        error(res.errorMsg);
+      }
       console.error(res.error);
       toast.error(res.errorMsg);
       return;
@@ -65,7 +67,9 @@ export function useTopUpDeposit(chainName: string) {
 
     const depositZeroTime = extractDepositZeroTime(res.response?.events);
     const txHash = res.response?.transactionHash;
-    success(depositZeroTime, txHash);
+    if (success) {
+      success(depositZeroTime, txHash);
+    }
     toast.success("Top up deposit successful");
   };
 

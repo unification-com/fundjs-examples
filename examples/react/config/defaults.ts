@@ -11,8 +11,6 @@ import {
 
 export const defaultChainName = process.env.NEXT_PUBLIC_DEFAULT_CHAIN ? process.env.NEXT_PUBLIC_DEFAULT_CHAIN : 'unification';
 
-console.log("defaultChainName", defaultChainName)
-
 const protoRegistry = [
     ...cosmosProtoRegistry,
     ...ibcProtoRegistry,

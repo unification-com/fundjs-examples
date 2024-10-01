@@ -27,7 +27,7 @@ const unificationDevnet: Chain = {
     bech32_prefix: "und",
     chain_id: "FUND-DevNet",
     chain_name: "unificationdevnet",
-    network_type: "cosmos",
+    network_type: "devnet",
     pretty_name: "Unification DevNet",
     slip44: 5555,
     status: "live",
@@ -64,7 +64,13 @@ const unificationDevnet: Chain = {
                 address: "http://localhost:1317",
                 provider: "Unification"
             }
-        ]
+        ],
+        wss: [
+            {
+                address: "ws://localhost:26657/websocket",
+                provider: "Unification"
+            }
+        ],
     },
     "explorers": [
         {

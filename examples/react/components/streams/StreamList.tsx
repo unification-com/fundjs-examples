@@ -45,9 +45,11 @@ export function StreamList({ chainName }: StreamsProps) {
     isLoading: isLoadingBalanceData,
     refetch: refetchBalanceData,
   } = useQueryBalance(chainName, "nund");
-  const { onCalculateFlowRate } = useCalculateFlowRate(chainName);
-  const { onCreateStream } = useCreateStream(chainName);
+  const { data: flowRateData, isDataReady: isFlowDataReady, onCalculateFlowRate } = useCalculateFlowRate(chainName);
+  const [flowUpdateRequested, setFlowUpdateRequested] = useState(false)
   const [isCalculated, setIsCalculated] = useState(false);
+
+  const { onCreateStream } = useCreateStream(chainName);
   const {
     modal: statusModal,
     open: openStatusModal,
@@ -124,6 +126,27 @@ export function StreamList({ chainName }: StreamsProps) {
     }
   }, [balanceData]);
 
+  useEffect(() => {
+    if(isFlowDataReady && streamData.params && flowUpdateRequested) {
+      const d = { ...newStreamFormData };
+      d.receiver = initStreamFormData.receiver;
+      d.deposit = initStreamFormData.fund as any;
+      d.flowRate = parseInt(flowRateData.flowRate);
+      d.depositEndTime = calculateDepositEndTime(
+          initStreamFormData.fund,
+          parseInt(flowRateData.flowRate)
+      );
+
+      const vf = parseFloat(streamData.params.validatorFee);
+      const validatorAmount = (initStreamFormData.fund as any) * vf;
+      d.validatorAmount = validatorAmount;
+      d.receiverAmount = (initStreamFormData.fund as any) - validatorAmount;
+      setNewStreamFormData(d);
+      setIsCalculated(true);
+      setFlowUpdateRequested(false)
+    }
+  }, [isFlowDataReady, streamData, flowRateData, flowUpdateRequested])
+
   function handleClickRefreshButton(e: { preventDefault: () => void }) {
     e.preventDefault();
     refetchStreamData();
@@ -164,11 +187,12 @@ export function StreamList({ chainName }: StreamsProps) {
     const nund = exponentiate(initStreamFormData.fund, exponent);
     const nundCoin = `${nund}nund`;
 
+    setFlowUpdateRequested(true)
+
     onCalculateFlowRate({
       coin: nundCoin,
       period: initStreamFormData.period as any,
       duration: initStreamFormData.duration as any,
-      success: onCalculateFlowRateSuccess,
     });
   }
 
@@ -224,24 +248,6 @@ export function StreamList({ chainName }: StreamsProps) {
     } else {
       setNewStreamFormData({ ...newStreamFormData, [name]: value });
     }
-  }
-
-  function onCalculateFlowRateSuccess(flowRate: string) {
-    const d = { ...newStreamFormData };
-    d.receiver = initStreamFormData.receiver;
-    d.deposit = initStreamFormData.fund as any;
-    d.flowRate = parseInt(flowRate);
-    d.depositEndTime = calculateDepositEndTime(
-      initStreamFormData.fund,
-      parseInt(flowRate)
-    );
-
-    const vf = parseFloat(streamData.params.validatorFee);
-    const validatorAmount = (initStreamFormData.fund as any) * vf;
-    d.validatorAmount = validatorAmount;
-    d.receiverAmount = (initStreamFormData.fund as any) - validatorAmount;
-    setNewStreamFormData(d);
-    setIsCalculated(true);
   }
 
   function resetFormData() {
