@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useRpcQueryClient } from ".";
+import {useEffect, useMemo, useState} from "react";
+import {useQueryHooks, useRpcQueryClient} from ".";
 import { toast } from "@interchain-ui/react";
 
 (BigInt.prototype as any).toJSON = function () {
@@ -10,46 +10,64 @@ export type CalculateFlowRateOptions = {
   coin: string;
   period: number;
   duration: number;
-  success?: (flowRate: string) => void;
-  error?: () => void;
 };
 
 export function useCalculateFlowRate(chainName: string) {
-  const { rpcQueryClient } = useRpcQueryClient(chainName);
+  // const { rpcQueryClient } = useRpcQueryClient(chainName);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [qCoin, setQCoin] = useState("100000000000nund");
+  const [qPeriod, setQPeriod] = useState(6);
+  const [qDuration, setQDuration] = useState(1);
+  const { mainchain, isReady, isFetching } = useQueryHooks(chainName);
 
-  async function onCalculateFlowRate({
+  const queryCalculateFlowRate =
+      mainchain.stream.v1.useCalculateFlowRate({
+        request: {
+          coin: qCoin,
+          period: qPeriod,
+          duration: BigInt(qDuration),
+        },
+        options: {
+          enabled: isReady,
+          staleTime: Infinity,
+          // select: ({streams, pagination}) => streams,
+        },
+      });
+
+  useEffect(() => {
+    queryCalculateFlowRate.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainName]);
+
+  const isQueryFetching = queryCalculateFlowRate.isFetching
+  const loading = isFetching || isQueryFetching
+
+  useEffect(() => {
+    // no loading when refetching
+    if (isFetching || isQueryFetching) setIsCalculating(true);
+    if (!loading) setIsCalculating(false);
+  }, [isQueryFetching, loading]);
+
+  const queryData = useMemo(() => {
+    if (isQueryFetching || !isReady) return;
+    setIsDataReady(true)
+    return queryCalculateFlowRate.data;
+
+  }, [isQueryFetching, isReady]);
+
+
+  function onCalculateFlowRate({
     coin,
     period,
     duration,
-    success = () => {},
-    error = () => {},
   }: CalculateFlowRateOptions) {
-    setIsCalculating(true);
-    try {
-      const res = await rpcQueryClient?.mainchain.stream.v1.calculateFlowRate({
-        coin,
-        period,
-        duration: BigInt(duration),
-      });
-
-      if (!res?.flowRate) {
-        console.error(res);
-        toast.error("Error calculating flow rate");
-        error();
-        return;
-      }
-
-      success(res.flowRate.toString());
-      toast.success("Calculate Flow Rate successful");
-    } catch (e) {
-      console.error(e);
-      toast.error("Calculate Flow Rate failed");
-      error();
-    } finally {
-      setIsCalculating(false);
-    }
+    setQCoin(coin)
+    setQPeriod(period)
+    setQDuration(duration)
+    setIsDataReady(false)
+    queryCalculateFlowRate.refetch()
   }
 
-  return { isCalculating, onCalculateFlowRate };
+  return { data: {...queryData}, isCalculating, isDataReady, onCalculateFlowRate };
 }

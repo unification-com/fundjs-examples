@@ -60,7 +60,9 @@ export function Stream({
   const [showTopUpInfo, setShowTopUpInfo] = useState(false);
   const { onClaimStream } = useClaimStream(chainName);
   const { onTopUpDeposit } = useTopUpDeposit(chainName);
-  const { onCalculateFlowRate } = useCalculateFlowRate(chainName);
+  const { data: flowRateData, isDataReady: isFlowDataReady, onCalculateFlowRate } = useCalculateFlowRate(chainName);
+  const [flowUpdateRequested, setFlowUpdateRequested] = useState(false)
+
   const { onUpdateFlowRate } = useUpdateFlowRate(chainName);
   const { onCancelStream } = useCancelSteam(chainName);
   const [streamData, setStreamData] = useState(stream);
@@ -135,6 +137,18 @@ export function Stream({
       clearInterval(interval);
     };
   }, [streamData, validatorFeePerc]);
+
+  useEffect(() => {
+    if(isFlowDataReady && flowUpdateRequested) {
+      setUpdateFlowFormData({
+        ...updateFlowFormData,
+        flowRate: parseInt(flowRateData.flowRate, 10),
+      });
+      closeStatusModal();
+      openSendUpdateFlowRateModal();
+      setFlowUpdateRequested(false)
+    }
+  }, [isFlowDataReady, streamData, flowRateData, flowUpdateRequested])
 
   function handleClaimSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
@@ -320,29 +334,22 @@ export function Stream({
     e.preventDefault();
     setModalContent(
       <Text fontSize="$lg">
-        <Spinner size="$5xl" /> Sending transaction
+        <Spinner size="$5xl" /> Calculating
       </Text>
     );
-    closeSendUpdateFlowRateModal();
+    closeUpdateFlowRateModal();
+    openStatusModal();
 
     const nund = exponentiate(updateFlowFormData.fund, exponent);
     const nundCoin = `${nund}nund`;
+
+    setFlowUpdateRequested(true)
 
     onCalculateFlowRate({
       coin: nundCoin,
       period: updateFlowFormData.period as any,
       duration: updateFlowFormData.duration as any,
-      success: onCalculateFlowRateSuccess,
     });
-  }
-
-  function onCalculateFlowRateSuccess(flowRate: string) {
-    setUpdateFlowFormData({
-      ...updateFlowFormData,
-      flowRate: parseInt(flowRate, 10),
-    });
-    closeUpdateFlowRateModal();
-    openSendUpdateFlowRateModal();
   }
 
   function handleSendUpdateFlowRateSubmit(e: { preventDefault: () => void }) {
