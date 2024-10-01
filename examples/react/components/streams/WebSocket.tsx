@@ -320,27 +320,28 @@ export const WebSocket = ({ chainName }: WebSocketProps) => {
   }[readyState];
 
   return (
-    <Box
-      borderRadius="$lg"
-      // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
-      backgroundColor="$cardBg"
-      px="$10"
-      pt="$4"
-      pb="$2"
-    >
-      <Text fontSize={"$lg"} fontWeight={"$bold"}>
-        Websocket events for {address} Payment Streams
-      </Text>
-      <Box mb="$4">
-        <Text>The WebSocket is currently {connectionStatus}</Text>
-      </Box>
-      <Stack as="ul" space="1" direction="vertical">
-        {messageHistory?.map((message, idx) => (
-          <ListItem key={`ws_event${idx}`} size={"sm"}>
-            - {message ? message : null}
-          </ListItem>
-        ))}
-      </Stack>
-    </Box>
+        !address ? null : <Box
+            borderRadius="$lg"
+            // backgroundColor={useColorModeValue("#F5F7FB", "#0F172A")}
+            backgroundColor="$cardBg"
+            px="$10"
+            pt="$4"
+            pb="$2"
+        >
+          <Text fontSize={"$lg"} fontWeight={"$bold"}>
+            Websocket events for {address} Payment Streams
+          </Text>
+          <Box mb="$4">
+            <Text>The WebSocket is currently {connectionStatus}</Text>
+          </Box>
+          <Stack as="ul" space="1" direction="vertical">
+            {messageHistory?.map((message, idx) => (
+                <ListItem key={`ws_event${idx}`} size={"sm"}>
+                  - {message ? message : null}
+                </ListItem>
+            ))}
+          </Stack>
+        </Box>
+
   );
 };
