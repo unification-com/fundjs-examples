@@ -13,7 +13,7 @@ import {
 } from "@interchain-ui/react";
 
 import { Stream as IStream } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
-import { exponentiate, getCoin, getExplorer, getExponent } from "@/utils";
+import {calculateFlowRate, exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
 import { useEffect, useState } from "react";
 import { useChain } from "@cosmos-kit/react";
 import { useClaimStream } from "@/hooks/useClaimStream";
@@ -60,8 +60,6 @@ export function Stream({
   const [showTopUpInfo, setShowTopUpInfo] = useState(false);
   const { onClaimStream } = useClaimStream(chainName);
   const { onTopUpDeposit } = useTopUpDeposit(chainName);
-  const { data: flowRateData, isDataReady: isFlowDataReady, onCalculateFlowRate } = useCalculateFlowRate(chainName);
-  const [flowUpdateRequested, setFlowUpdateRequested] = useState(false)
 
   const { onUpdateFlowRate } = useUpdateFlowRate(chainName);
   const { onCancelStream } = useCancelSteam(chainName);
@@ -98,7 +96,6 @@ export function Stream({
     deposotZeroTime: 0,
   });
 
-  const [selectedlabel, setselectedlabel] = useState("Month");
   const [updateFlowFormData, setUpdateFlowFormData] = useState({
     fund: "100",
     period: "6",
@@ -137,18 +134,6 @@ export function Stream({
       clearInterval(interval);
     };
   }, [streamData, validatorFeePerc]);
-
-  useEffect(() => {
-    if(isFlowDataReady && flowUpdateRequested) {
-      setUpdateFlowFormData({
-        ...updateFlowFormData,
-        flowRate: parseInt(flowRateData.flowRate, 10),
-      });
-      closeStatusModal();
-      openSendUpdateFlowRateModal();
-      setFlowUpdateRequested(false)
-    }
-  }, [isFlowDataReady, streamData, flowRateData, flowUpdateRequested])
 
   function handleClaimSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
@@ -309,47 +294,28 @@ export function Stream({
   }
 
   function handleUpdateFlowRateInputChange(e: {
-    target: { id: any; value: any; options: any; selectedIndex: any };
+    target: { id: any; value: any; };
   }) {
-    const { id, value, options, selectedIndex } = e.target;
+    const { id, value } = e.target;
     setUpdateFlowFormData({ ...updateFlowFormData, [id]: value });
-    if (options) {
-      setselectedlabel(options[selectedIndex]?.text || "");
-    }
   }
-
-  const handleSelectChange = (
-    selectedItem: { key: string; label: string } | null
-  ) => {
-    if (selectedItem) {
-      setUpdateFlowFormData((prevState) => ({
-        ...prevState,
-        period: selectedItem.key,
-      }));
-      setselectedlabel(selectedItem.label);
-    }
-  };
 
   function handleUpdateFlowRateSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
-    setModalContent(
-      <Text fontSize="$lg">
-        <Spinner size="$5xl" /> Calculating
-      </Text>
-    );
-    closeUpdateFlowRateModal();
-    openStatusModal();
 
+    // convert FUND to nund
     const nund = exponentiate(updateFlowFormData.fund, exponent);
-    const nundCoin = `${nund}nund`;
 
-    setFlowUpdateRequested(true)
+    // calculate flow rate
+    const fr = calculateFlowRate(nund, updateFlowFormData.period, updateFlowFormData.duration)
 
-    onCalculateFlowRate({
-      coin: nundCoin,
-      period: updateFlowFormData.period as any,
-      duration: updateFlowFormData.duration as any,
+    setUpdateFlowFormData({
+      ...updateFlowFormData,
+      flowRate: fr,
     });
+
+    closeUpdateFlowRateModal();
+    openSendUpdateFlowRateModal();
   }
 
   function handleSendUpdateFlowRateSubmit(e: { preventDefault: () => void }) {
@@ -689,50 +655,6 @@ export function Stream({
           onSubmit={handleUpdateFlowRateSubmit}
           className={"payment-stream-form"}
         >
-          {/* <Text>
-            Send:
-            <input
-              type="text"
-              name="fund"
-              value={updateFlowFormData.fund}
-              onChange={handleUpdateFlowRateInputChange}
-            />{" "}
-            FUND
-          </Text> */}
-          {/* <Text>
-            Every
-            <input
-              type="text"
-              size={1}
-              name="duration"
-              value={updateFlowFormData.duration}
-              onChange={handleUpdateFlowRateInputChange}
-            />
-            <select
-              value={updateFlowFormData.period}
-              onChange={handleUpdateFlowRateInputChange}
-              name="period"
-            >
-              <option value="2">
-                Minute{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-              <option value="3">
-                Hour{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-              <option value="4">
-                Day{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-              <option value="5">
-                Week{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-              <option value="6">
-                Month{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-              <option value="7">
-                Year{updateFlowFormData.duration > 1 ? "s" : null}
-              </option>
-            </select>
-          </Text> */}
           <Box mb="$1">
             <TextField
               id="fund"
@@ -757,9 +679,7 @@ export function Stream({
                 name="duration"
                 value={updateFlowFormData.duration || "1"}
                 onChange={handleUpdateFlowRateInputChange}
-                label={`Every ${
-                  updateFlowFormData.duration || "1"
-                } ${selectedlabel}`}
+                label="Every"
                 inputClassName="inputBox"
                 placeholder="Enter Duration"
               />
@@ -797,45 +717,6 @@ export function Stream({
                   Year{updateFlowFormData.duration > "1" ? "s" : null}
                 </option>
               </select>
-              {/* <Select
-                id="period"
-                placeholder="Select Period"
-                onSelectItem={(item) => handleSelectChange(item)}
-                size="sm"
-                optionsWidth="300px"
-                defaultSelectedItem={{
-                  key: `${updateFlowFormData.duration}`,
-                  label: `Hour${updateFlowFormData.duration > "1" ? "s" : ""}`,
-                  index: 3,
-                }}
-              >
-                <SelectOption
-                  optionKey="2"
-                  label={`Minute${
-                    updateFlowFormData.duration > "1" ? "s" : ""
-                  }`}
-                />
-                <SelectOption
-                  optionKey="3"
-                  label={`Hour${updateFlowFormData.duration > "1" ? "s" : ""}`}
-                />
-                <SelectOption
-                  optionKey="4"
-                  label={`Day${updateFlowFormData.duration > "1" ? "s" : ""}`}
-                />
-                <SelectOption
-                  optionKey="5"
-                  label={`Week${updateFlowFormData.duration > "1" ? "s" : ""}`}
-                />
-                <SelectOption
-                  optionKey="6"
-                  label={`Month${updateFlowFormData.duration > "1" ? "s" : ""}`}
-                />
-                <SelectOption
-                  optionKey="7"
-                  label={`Year${updateFlowFormData.duration > "1" ? "s" : ""}`}
-                />
-              </Select> */}
             </Box>
           </Box>
           <Box

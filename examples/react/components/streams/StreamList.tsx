@@ -15,12 +15,12 @@ import {
   useColorModeValue,
 } from "@interchain-ui/react";
 import { useModal, usePaymentStreamData, useQueryBalance } from "@/hooks";
-import { exponentiate, getCoin, getExplorer, getExponent } from "@/utils";
+import {calculateFlowRate, exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
 import { Stream } from "@/components/streams/Stream";
 import { useCalculateFlowRate } from "@/hooks/useCalculateFlowRate";
 import { useEffect, useState } from "react";
 import { useCreateStream } from "@/hooks/useCreateStream";
-import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+import { Stream as StreamType, StreamPeriod } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
 import { WalletStatus } from "@cosmos-kit/core";
 
 export type StreamsProps = {
@@ -45,8 +45,7 @@ export function StreamList({ chainName }: StreamsProps) {
     isLoading: isLoadingBalanceData,
     refetch: refetchBalanceData,
   } = useQueryBalance(chainName, "nund");
-  const { data: flowRateData, isDataReady: isFlowDataReady, onCalculateFlowRate } = useCalculateFlowRate(chainName);
-  const [flowUpdateRequested, setFlowUpdateRequested] = useState(false)
+
   const [isCalculated, setIsCalculated] = useState(false);
 
   const { onCreateStream } = useCreateStream(chainName);
@@ -59,7 +58,6 @@ export function StreamList({ chainName }: StreamsProps) {
   const [currentAddress, setCurrentAddress] = useState<string>("");
   const [currentBalance, setCurrentBalance] = useState<any>(null);
   const [currentChainName, setCurrentChainName] = useState(chainName);
-  const [selectedlabel, setselectedlabel] = useState("");
   const [initStreamFormData, setInitStreamFormData] = useState({
     fund: "100",
     period: "6",
@@ -126,27 +124,6 @@ export function StreamList({ chainName }: StreamsProps) {
     }
   }, [balanceData]);
 
-  useEffect(() => {
-    if(isFlowDataReady && streamData.params && flowUpdateRequested) {
-      const d = { ...newStreamFormData };
-      d.receiver = initStreamFormData.receiver;
-      d.deposit = initStreamFormData.fund as any;
-      d.flowRate = parseInt(flowRateData.flowRate);
-      d.depositEndTime = calculateDepositEndTime(
-          initStreamFormData.fund,
-          parseInt(flowRateData.flowRate)
-      );
-
-      const vf = parseFloat(streamData.params.validatorFee);
-      const validatorAmount = (initStreamFormData.fund as any) * vf;
-      d.validatorAmount = validatorAmount;
-      d.receiverAmount = (initStreamFormData.fund as any) - validatorAmount;
-      setNewStreamFormData(d);
-      setIsCalculated(true);
-      setFlowUpdateRequested(false)
-    }
-  }, [isFlowDataReady, streamData, flowRateData, flowUpdateRequested])
-
   function handleClickRefreshButton(e: { preventDefault: () => void }) {
     e.preventDefault();
     refetchStreamData();
@@ -183,37 +160,36 @@ export function StreamList({ chainName }: StreamsProps) {
       toast.error("Receiver wallet address required");
       return;
     }
+
     // convert FUND to nund
     const nund = exponentiate(initStreamFormData.fund, exponent);
-    const nundCoin = `${nund}nund`;
 
-    setFlowUpdateRequested(true)
+    // calculate flow rate
+    const fr = calculateFlowRate(nund, initStreamFormData.period, initStreamFormData.duration)
 
-    onCalculateFlowRate({
-      coin: nundCoin,
-      period: initStreamFormData.period as any,
-      duration: initStreamFormData.duration as any,
-    });
+    const d = { ...newStreamFormData };
+    d.receiver = initStreamFormData.receiver;
+    d.deposit = initStreamFormData.fund as any;
+    d.flowRate = fr;
+    d.depositEndTime = calculateDepositEndTime(
+        initStreamFormData.fund,
+        fr
+    );
+
+    const vf = parseFloat(streamData.params.validatorFee);
+    const validatorAmount = (initStreamFormData.fund as any) * vf;
+    d.validatorAmount = validatorAmount;
+    d.receiverAmount = (initStreamFormData.fund as any) - validatorAmount;
+    setNewStreamFormData(d);
+    setIsCalculated(true);
   }
 
   function handleInitNewStreamInputChange(e: {
-    target: { id: any; value: any };
+    target: { id: any; value: any;};
   }) {
     const { id, value } = e.target;
     setInitStreamFormData({ ...initStreamFormData, [id]: value });
   }
-  const handleSelectChange = (
-    selectedItem: { key: string; label: string } | null
-  ) => {
-    if (selectedItem) {
-      setInitStreamFormData((prevState) => ({
-        ...prevState,
-        period: selectedItem.key,
-      }));
-
-      setselectedlabel(selectedItem.label);
-    }
-  };
 
   function calculateDepositEndTime(
     deposit: string | number | undefined,
@@ -491,90 +467,69 @@ export function StreamList({ chainName }: StreamsProps) {
                         name="duration"
                         value={initStreamFormData.duration || "1"}
                         onChange={handleInitNewStreamInputChange}
-                        label={`Every ${
-                          initStreamFormData.duration || "1"
-                        } ${selectedlabel}`}
+                        label="Every"
                         inputClassName="inputBox"
                         placeholder="Enter Duration"
                       />
                     </Box>
                     <Box mt="$11">
-                      <Select
-                        id="period"
-                        placeholder="Select Period"
-                        onSelectItem={(item) => handleSelectChange(item)}
-                        size="sm"
-                        optionsWidth="300px"
-                        defaultSelectedItem={{
-                          key: `${initStreamFormData.duration}`,
-                          label: `Month${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`,
-                          index: 4,
-                        }}
+                      <select
+                          id="period"
+                          value={initStreamFormData.period}
+                          onChange={handleInitNewStreamInputChange}
+                          name="period"
+                          style={{
+                            background: useColorModeValue("#fff", "#0F172A"),
+                            color: useColorModeValue("#0F172A", "#fff"),
+                            width: "100px",
+                            height: "40px",
+                          }}
+                          defaultValue={"2"}
                       >
-                        <SelectOption
-                          optionKey="2"
-                          label={`Minute${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                        <SelectOption
-                          optionKey="3"
-                          label={`Hour${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                        <SelectOption
-                          optionKey="4"
-                          label={`Day${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                        <SelectOption
-                          optionKey="5"
-                          label={`Week${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                        <SelectOption
-                          optionKey="6"
-                          label={`Month${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                        <SelectOption
-                          optionKey="7"
-                          label={`Year${
-                            initStreamFormData.duration > "1" ? "s" : ""
-                          }`}
-                        />
-                      </Select>
+                        <option value="2">
+                          Minute{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                        <option value="3">
+                          Hour{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                        <option value="4">
+                          Day{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                        <option value="5">
+                          Week{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                        <option value="6">
+                          Month{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                        <option value="7">
+                          Year{initStreamFormData.duration > "1" ? "s" : null}
+                        </option>
+                      </select>
                     </Box>
                   </Box>
                 </Box>
 
                 <Box mb="$3" flexGrow={1}>
                   <TextField
-                    id="receiver"
-                    type="text"
-                    size="sm"
-                    name="receiver"
-                    value={initStreamFormData.receiver}
-                    onChange={handleInitNewStreamInputChange}
-                    label="Receiver Wallet Address"
-                    placeholder="Enter wallet address"
+                      id="receiver"
+                      type="text"
+                      size="sm"
+                      name="receiver"
+                      value={initStreamFormData.receiver}
+                      onChange={handleInitNewStreamInputChange}
+                      label="Receiver Wallet Address"
+                      placeholder="Enter wallet address"
                   />
                 </Box>
               </Box>
 
               <Box
-                mb="$1"
-                mt="$10"
-                display={"flex"}
-                alignItems={"center"}
-                justifyContent={"end"}
-                width={isCalculated ? "223px" : ""}
+                  mb="$1"
+                  mt="$10"
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"end"}
+                  width={isCalculated ? "223px" : ""}
               >
                 <Button variant="solid" intent="success">
                   Calculate
@@ -584,12 +539,12 @@ export function StreamList({ chainName }: StreamsProps) {
           </Box>
           <Box mt="$8" display={!isCalculated ? "none" : "table-cell"}>
             {!isCalculated ? null : (
-              <form
-                onSubmit={handleCreateNewStreamSubmit}
-                className={"payment-stream-form"}
-                style={{
-                  border: "1px solid #979797",
-                  borderRadius: "6px",
+                <form
+                    onSubmit={handleCreateNewStreamSubmit}
+                    className={"payment-stream-form"}
+                    style={{
+                      border: "1px solid #979797",
+                      borderRadius: "6px",
                 }}
               >
                 <Text fontSize="$lg" fontWeight="$bold">

@@ -3,6 +3,9 @@ import BigNumber from 'bignumber.js';
 import {Chain} from '@chain-registry/types';
 import {assets, chains} from '@/config';
 import {AssetList, Asset} from '@chain-registry/types';
+import {StreamPeriod} from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+import {parseCoins} from "@cosmjs/stargate";
+import {Coins} from "@hexxagon/feather.js";
 
 export function getChainLogo(chain: Chain) {
     return chain.logo_URIs?.svg || chain.logo_URIs?.png || chain.logo_URIs?.jpeg;
@@ -122,4 +125,44 @@ export function truncateAddress(fullStr: string, strLen: number = 20, separator:
     return fullStr.substr(0, frontChars) +
         separator +
         fullStr.substr(fullStr.length - backChars);
+}
+
+export function calculateFlowRate(amount: number, period: string, duration: string): number {
+
+    let baseDuration = 1
+    let totalDuration = 1
+    const p = parseInt(period, 10)
+    const d = parseInt(duration)
+
+    switch (p) {
+        case StreamPeriod.STREAM_PERIOD_UNSPECIFIED:
+            baseDuration = 1
+            break
+        case StreamPeriod.STREAM_PERIOD_SECOND:
+        default:
+            baseDuration = 1
+            break
+        case StreamPeriod.STREAM_PERIOD_MINUTE:
+            baseDuration = 60
+            break
+        case StreamPeriod.STREAM_PERIOD_HOUR:
+            baseDuration = 3600
+            break
+        case StreamPeriod.STREAM_PERIOD_DAY:
+            baseDuration = 86400
+            break
+        case StreamPeriod.STREAM_PERIOD_WEEK:
+            baseDuration = 604800
+            break
+        case StreamPeriod.STREAM_PERIOD_MONTH:
+            baseDuration = 2628000 // (365 / 12) * 24 * 60 * 60 = 30.416666667 * 24 * 60 * 60
+            break
+        case StreamPeriod.STREAM_PERIOD_YEAR:
+            baseDuration = 31536000
+            break
+    }
+
+    totalDuration = baseDuration * d
+
+    return Math.floor(amount / totalDuration)
 }

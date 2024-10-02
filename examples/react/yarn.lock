@@ -156,6 +156,11 @@
   resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.45.82.tgz#58896c8c9a5bef601763b3ea5cb82d9d64bbcbcb"
   integrity sha512-XZpg/p5lyIn5kaNg3EpMvJVvuB/8eqJuyhgTebGXzDBgitw4rpJvqVkEbXJ52T8sXhnMp7+uakjfvd7JzYBC2w==
 
+"@chain-registry/types@^0.46.4":
+  version "0.46.4"
+  resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-0.46.4.tgz#c1e0ec8a4c7abf85d80528421b836a1495abc316"
+  integrity sha512-nRsj99Y37dggLpz6iU+SL+Pl4FwVq0TgRya4rKJKS59HA2d2/FfmacFELervO/5zC48NArK6KiTqeq1g0UZ4+w==
+
 "@chain-registry/utils@^1.46.1", "@chain-registry/utils@^1.46.82":
   version "1.46.82"
   resolved "https://registry.yarnpkg.com/@chain-registry/utils/-/utils-1.46.82.tgz#a03e65bc935e9159ac328a5645418ebcd22f2f54"
@@ -4299,12 +4304,12 @@ ccount@^2.0.0:
   resolved "https://registry.yarnpkg.com/ccount/-/ccount-2.0.1.tgz#17a3bf82302e0870d6da43a01311a8bc02a3ecf5"
   integrity sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==
 
-chain-registry@1.63.102:
-  version "1.63.102"
-  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.63.102.tgz#ec95a02d3bc7036d9413eba09aacc532e14695c0"
-  integrity sha512-ktWywaoQRhAXncoW6+RFt8NjznqHKATTPlRdyt08ZwoUB+XCezGDCs+35IzeIf2I82LRUxrtulvXNm3f9nn07g==
+chain-registry@^1.64.4:
+  version "1.64.4"
+  resolved "https://registry.yarnpkg.com/chain-registry/-/chain-registry-1.64.4.tgz#84d4be3a1249220e1ef0933a6c15aa51b99cc385"
+  integrity sha512-Puua0oCOB4jW4iLA35dn2l9odgDLq0w5sY0xLC9RzicEQa6s4ZCzkk7O5YzXIqEUdFa7R26uIE5V6r3bhnfdUQ==
   dependencies:
-    "@chain-registry/types" "^0.45.82"
+    "@chain-registry/types" "^0.46.4"
 
 chalk@^2.4.2:
   version "2.4.2"
@@ -7411,10 +7416,10 @@ react-icons@4.4.0:
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.4.0.tgz#a13a8a20c254854e1ec9aecef28a95cdf24ef703"
   integrity sha512-fSbvHeVYo/B5/L4VhB7sBA1i2tS8MkT0Hb9t2H1AVPkwGfVHLJCqyr2Py9dKMxsyM63Eng1GkdZfbWj+Fmv8Rg==
 
-react-icons@4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.6.0.tgz#f83eda179af5d02c047449a20b702c858653d397"
-  integrity sha512-rR/L9m9340yO8yv1QT1QurxWQvWpbNHqVX0fzMln2HEb9TEIrQRGsqiNFQfiv9/JEUbyHmHPlNTB2LWm2Ttz0g==
+react-icons@^4.6.0:
+  version "4.12.0"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.12.0.tgz#54806159a966961bfd5cdb26e492f4dafd6a8d78"
+  integrity sha512-IBaDuHiShdZqmfc/TwHu6+d6k2ltNCf3AszxNmjJc1KUfXdEeRJOKyNvLmAHaarhzGmTSVygNdyu8/opXv2gaw==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
