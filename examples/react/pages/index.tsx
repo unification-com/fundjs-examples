@@ -16,7 +16,7 @@ export default function Home() {
       <ReactNoSSR>
         <Wallet chainName={chainName} onChainChange={onChainChange} />
         <StreamList chainName={chainName} />
-        <WebSocket chainName={chainName} />
+        {/*<WebSocket chainName={chainName} />*/}
       </ReactNoSSR>
     </Layout>
   );

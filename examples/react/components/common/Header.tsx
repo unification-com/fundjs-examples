@@ -57,7 +57,7 @@ export function Header() {
               marginBottom: "$1",
             }}
           >
-            Payment Streams Example UI
+            Payment Streams
           </Text>
         </Box>
       </Box>

@@ -1,6 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {useQueryHooks, useRpcQueryClient} from ".";
-import { toast } from "@interchain-ui/react";
+import {useQueryHooks} from ".";
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -13,7 +12,6 @@ export type CalculateFlowRateOptions = {
 };
 
 export function useCalculateFlowRate(chainName: string) {
-  // const { rpcQueryClient } = useRpcQueryClient(chainName);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isDataReady, setIsDataReady] = useState(false);
   const [qCoin, setQCoin] = useState("100000000000nund");

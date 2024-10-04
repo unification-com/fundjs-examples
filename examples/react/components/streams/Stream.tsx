@@ -18,11 +18,14 @@ import { useEffect, useState } from "react";
 import { useChain } from "@cosmos-kit/react";
 import { useClaimStream } from "@/hooks/useClaimStream";
 import { coin, Coin, parseCoins } from "@cosmjs/stargate";
-import { useModal } from "@/hooks";
+import {useModal, useTx} from "@/hooks";
 import { useTopUpDeposit } from "@/hooks/useTopupDeposit";
 import { useCalculateFlowRate } from "@/hooks/useCalculateFlowRate";
 import { useUpdateFlowRate } from "@/hooks/useUpdateFlowRate";
 import { useCancelSteam } from "@/hooks/useCancelStream";
+import {useQueryStreamTxs} from "@/hooks/useQueryStreamTxs";
+import {TxHistory} from "@/components/streams/TxHistory";
+import {TxResponse} from "cosmjs-types/cosmos/base/abci/v1beta1/abci";
 
 export type StreamProps = {
   stream: IStream;
@@ -64,6 +67,9 @@ export function Stream({
   const { onUpdateFlowRate } = useUpdateFlowRate(chainName);
   const { onCancelStream } = useCancelSteam(chainName);
   const [streamData, setStreamData] = useState(stream);
+
+
+
   const {
     modal: topupDepositModal,
     open: openTopupDepositModal,
@@ -183,6 +189,14 @@ export function Stream({
       success: onClaimStreamSuccess,
       error: onSendTxError,
     });
+  }
+
+  function handleTxHistoryClick(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    setModalContent(
+        <TxHistory chainName={chainName} sender={sender} receiver={receiver} />
+    )
+    openStatusModal()
   }
 
   function handleOnCloseStatusModal() {
@@ -417,19 +431,34 @@ export function Stream({
   const chainCoin = getCoin(chainName);
   const exponent = getExponent(chainName);
 
+  const txHistory = (
+      <Button
+          intent="primary"
+          size={"sm"}
+          onClick={handleTxHistoryClick}
+          className="claim-btm"
+      >
+        Tx History
+      </Button>
+  )
+
   const claim = (
-    <Button
-      intent="primary"
-      size={"sm"}
-      onClick={handleClaimSubmit}
-      className="claim-btm"
-    >
-      Claim
-    </Button>
+      <Stack direction="vertical" space="$6">
+        {txHistory}
+        <Button
+            intent="primary"
+            size={"sm"}
+            onClick={handleClaimSubmit}
+            className="claim-btm"
+        >
+          Claim
+        </Button>
+      </Stack>
   );
 
   const editButtons = (
     <Stack direction="vertical" space="$6">
+      {txHistory}
       <Button intent="tertiary" size={"sm"} onClick={openTopupDepositModal}>
         Top Up Deposit
       </Button>
