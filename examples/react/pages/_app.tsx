@@ -46,7 +46,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
   };
 
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme={"dark"}>
       <ChainProvider
         chains={chains}
         assetLists={assets}
