@@ -16,12 +16,12 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
 
     const { cosmos, isReady, isFetching } = useQueryHooks(chainName);
 
-    function setQueryData(sender: string, receiver: string) {
-        if (receiver !== "") {
-            setReceiver(receiver)
+    function setQueryData(sen: string, rec: string) {
+        if (rec !== "") {
+            setReceiver(rec)
         }
-        if(sender !== "") {
-            setSender(sender)
+        if(sen !== "") {
+            setSender(sen)
         }
     }
 
@@ -151,22 +151,3 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
 
     return { data: queriesData, isLoading, setQueryData };
 }
-
-
-//get create stream events for sender/receiver
-// https://rest-testnet.unification.io/cosmos/tx/v1beta1/txs?events=create_stream.sender%3D'und1d4qjey4qkj79ek4ah8350j9wzr009vcc823wa4'&events=create_stream.receiver%3D'und1xwp04mzdzrj5nz63rhxxkf2fjc8rjrt46xam8l'
-//
-// get claim stream events for sender/receiver
-// https://rest-testnet.unification.io/cosmos/tx/v1beta1/txs?events=claim_stream.sender%3D'und1d4qjey4qkj79ek4ah8350j9wzr009vcc823wa4'&events=claim_stream.receiver%3D'und1xwp04mzdzrj5nz63rhxxkf2fjc8rjrt46xam8l'
-//
-// stream_deposit
-// https://rest-testnet.unification.io/cosmos/tx/v1beta1/txs?events=stream_deposit.sender%3D'und1d4qjey4qkj79ek4ah8350j9wzr009vcc823wa4'&events=stream_deposit.receiver%3D'und1xwp04mzdzrj5nz63rhxxkf2fjc8rjrt46xam8l'
-//
-//
-// update_flow_rate
-// https://rest-testnet.unification.io/cosmos/tx/v1beta1/txs?events=update_flow_rate.sender%3D'und1d4qjey4qkj79ek4ah8350j9wzr009vcc823wa4'&events=update_flow_rate.receiver%3D'und1xwp04mzdzrj5nz63rhxxkf2fjc8rjrt46xam8l'
-//
-//
-//
-// cancel_stream
-// https://rest-testnet.unification.io/cosmos/tx/v1beta1/txs?events=cancel_stream.sender%3D'und1d4qjey4qkj79ek4ah8350j9wzr009vcc823wa4'&events=cancel_stream.receiver%3D'und1xwp04mzdzrj5nz63rhxxkf2fjc8rjrt46xam8l'
