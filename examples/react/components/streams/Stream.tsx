@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { useChain } from "@cosmos-kit/react";
 import { useClaimStream } from "@/hooks/useClaimStream";
 import { coin, Coin, parseCoins } from "@cosmjs/stargate";
-import {useModal, useTx} from "@/hooks";
+import {useModal, useQueryAccountInfo, useTx} from "@/hooks";
 import { useTopUpDeposit } from "@/hooks/useTopupDeposit";
 import { useCalculateFlowRate } from "@/hooks/useCalculateFlowRate";
 import { useUpdateFlowRate } from "@/hooks/useUpdateFlowRate";
@@ -63,7 +63,6 @@ export function Stream({
   const [showTopUpInfo, setShowTopUpInfo] = useState(false);
   const { onClaimStream } = useClaimStream(chainName);
   const { onTopUpDeposit } = useTopUpDeposit(chainName);
-
   const { onUpdateFlowRate } = useUpdateFlowRate(chainName);
   const { onCancelStream } = useCancelSteam(chainName);
   const [streamData, setStreamData] = useState(stream);

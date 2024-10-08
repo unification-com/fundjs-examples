@@ -12,3 +12,4 @@ export * from './useQueryStreamParams';
 export * from './useTopupDeposit';
 export * from './useUpdateFlowRate';
 export * from './usePagination';
+export * from './useQueryAccountInfo';

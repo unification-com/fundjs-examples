@@ -10,17 +10,14 @@ import {
   Text,
   TextField,
   toast,
-  Select,
-  SelectOption,
   useColorModeValue,
 } from "@interchain-ui/react";
-import { useModal, usePaymentStreamData, useQueryBalance } from "@/hooks";
-import {calculateFlowRate, exponentiate, getCoin, getExplorer, getExponent} from "@/utils";
+import {useModal, usePaymentStreamData, useQueryAccountInfo, useQueryBalance} from "@/hooks";
+import {calculateFlowRate, exponentiate, getExplorer, getExponent} from "@/utils";
 import { Stream } from "@/components/streams/Stream";
-import { useCalculateFlowRate } from "@/hooks/useCalculateFlowRate";
 import { useEffect, useState } from "react";
 import { useCreateStream } from "@/hooks/useCreateStream";
-import { Stream as StreamType, StreamPeriod } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
+import { Stream as StreamType } from "@unification-com/fundjs-react/mainchain/stream/v1/stream";
 import { WalletStatus } from "@cosmos-kit/core";
 
 export type StreamsProps = {
@@ -76,6 +73,8 @@ export function StreamList({ chainName }: StreamsProps) {
 
   const exponent = getExponent(chainName);
   const explorer = getExplorer(chainName);
+
+  const {data: accountInfo, setQueryData: setAccInfoQuery, isLoading: isAccInfoLoading, refetch: refetchAccInfo} = useQueryAccountInfo(chainName, "")
 
   // refetch data when wallet address changes - only if not data is currently loading
   useEffect(() => {
@@ -182,6 +181,10 @@ export function StreamList({ chainName }: StreamsProps) {
     d.receiverAmount = (initStreamFormData.fund as any) - validatorAmount;
     setNewStreamFormData(d);
     setIsCalculated(true);
+
+    // query receiver wallet account to see if it exists
+    setAccInfoQuery(initStreamFormData.receiver)
+    refetchAccInfo()
   }
 
   function handleInitNewStreamInputChange(e: {
@@ -383,20 +386,6 @@ export function StreamList({ chainName }: StreamsProps) {
     </>
   );
 
-  // @ts-ignore
-  // const balance = (
-  //   <>
-  //     <Text fontSize="$lg" fontWeight={"$bold"} textAlign={"center"}>
-  //       Balance:{" "}
-  //       {parseInt(currentBalance?.balance?.amount, 10) > 0
-  //         ? new Intl.NumberFormat("en-GB").format(
-  //             exponentiate(currentBalance?.balance?.amount, -exponent)
-  //           )
-  //         : 0}{" "}
-  //       FUND
-  //     </Text>
-  //   </>
-  // );
   const textColor = useColorModeValue("#000", "#fff");
   const bgColor = useColorModeValue("#fff", "#0F172A");
   const createNewStreamContent = (
@@ -551,8 +540,25 @@ export function StreamList({ chainName }: StreamsProps) {
                   2. Verify the following, then click Create
                 </Text>
                 <Text fontSize="$md">
-                  <strong>Receiver:</strong> {newStreamFormData.receiver}
+                  <strong>Receiver:</strong> {
+                  isAccInfoLoading ? <Spinner /> : newStreamFormData.receiver
+                }
                 </Text>
+                  {
+                    !isAccInfoLoading && accountInfo?.error !== null ? (
+                        <Box
+                            backgroundColor="#fac9ff"
+                            p="$2"
+                            borderRadius={"$md"}
+                            mb="$3"
+                            mt={"$3"}
+                        >
+                          <Text fontSize="$md" color={"#000"}>{
+                            accountInfo?.error.message.includes("NotFound") ? "Receiver wallet does not currently exist. Send FUND to it" : accountInfo?.error.message
+                          }</Text>
+                        </Box>
+                    ) : <></>
+                  }
                 <Text fontSize="$md">
                   <strong>Deposit:</strong>{" "}
                   <input
