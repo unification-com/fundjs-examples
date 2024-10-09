@@ -536,7 +536,7 @@ export function Stream({
           <Box mt="$8" display="table-row">
             <Box mt="$8" display="table-cell" paddingBottom="8px">
               <Text fontSize="$sm" fontWeight="$bold">
-                Deposit:
+                Remaining Deposit:
               </Text>
             </Box>
             <Box mt="$8" display="table-cell">
