@@ -4,7 +4,7 @@ import {
   ClipboardCopyText,
   Stack,
   useColorModeValue,
-  Text,
+  Text, Link,
 } from "@interchain-ui/react";
 import { WalletStatus } from "@cosmos-kit/core";
 import { useChain } from "@cosmos-kit/react";
@@ -104,6 +104,24 @@ export function Wallet({
       onChainChange(selected);
     }
   }, []);
+
+  const faucet = (
+      <Box pt="$4" pb="$4" mb="$3" pl="$8">
+        <Text fontSize="$md">
+          <strong>
+            Get TestNet FUND from the{" "}
+            <Link
+                href={"https://faucet-testnet.unification.io"}
+                target={"_blank"}
+                underline={true}
+            >
+              Faucet
+            </Link>
+          </strong>
+        </Text>
+      </Box>
+  );
+
   return (
     <Box pt="$16" pb="$8" display="flex" gap="20px" flexWrap={"wrap"}>
       <Box maxWidth="28rem" display={"flex"} flexDirection={"column"}>
@@ -191,6 +209,7 @@ export function Wallet({
               <Box pb="$8">FUND</Box>
             </Text>
           </Box>
+          {chainName === "unificationtestnet" ? faucet : null}
         </Box>
       )}
     </Box>
