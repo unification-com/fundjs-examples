@@ -694,27 +694,10 @@ export function StreamList({ chainName }: StreamsProps) {
     />
   );
 
-  const faucet = (
-    <Box mb="$8" display="flex" alignItems="center">
-      <Text fontSize="$md">
-        <strong>
-          Get TestNet FUND from the{" "}
-          <Link
-            href={"https://faucet-testnet.unification.io"}
-            target={"_blank"}
-            underline={true}
-          >
-            Faucet
-          </Link>
-        </strong>
-      </Text>
-    </Box>
-  );
+
 
   return (
     <Box mb="$10" position="relative">
-      {chainName === "unificationtestnet" ? faucet : null}
-      {/* <Box mb="$8">{address ? balance : null}</Box> */}
       {address ? content : connect}
       <BasicModal
         title={
