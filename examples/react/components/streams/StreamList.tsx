@@ -662,7 +662,7 @@ export function StreamList({ chainName }: StreamsProps) {
   const connect = (
     <Box mt="$8" display="flex" alignItems="center" justifyContent="center">
       <Text fontSize="$lg">
-        Please connect to your wallet to see the streams.
+        Please connect to your wallet to interact with Payment Streams.
       </Text>
     </Box>
   );
