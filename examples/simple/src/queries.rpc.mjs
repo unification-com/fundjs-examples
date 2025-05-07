@@ -18,7 +18,7 @@ createMainchainRPCQueryClient({rpcEndpoint: RPC_ENDPOINT})
     // Query node_info
     console.log("- Get node info")
     const nodeInfo = await clients.mainchainClient.cosmos.base.tendermint.v1beta1.getNodeInfo()
-    console.log(`  - Chain ID: ${nodeInfo.nodeInfo.network}`)
+    console.log(`  - Chain ID: ${nodeInfo.defaultNodeInfo.network}`)
     return clients
 }).then(async clients => {
     // Query node_info

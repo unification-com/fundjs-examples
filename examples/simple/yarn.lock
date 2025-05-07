@@ -380,10 +380,10 @@
   dependencies:
     undici-types "~6.19.2"
 
-"@unification-com/fundjs@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@unification-com/fundjs/-/fundjs-0.0.9.tgz#3fd62a8cddccabaf0b1c9e5ae3f472d0e7ff57ab"
-  integrity sha512-c4jUQ4w7Gw9iRhtW7VUAwNPJwaLPwnWM6iK4biBlhnTg8K3oY7lqhjH8B9DWZBZbhZ9UQHIrcYf7bvcUlQjJIA==
+"@unification-com/fundjs@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@unification-com/fundjs/-/fundjs-0.1.0.tgz#951782022d85837063bcb062f2d0751a9e2fb986"
+  integrity sha512-+Ovrg8ZBUdJ23XZs02beMLmGsETsS9uDXrkgYAxvu7B6cRINItva/qYZDjjWpH+C2niWSXssfaHn0A9//CaX8w==
   dependencies:
     "@cosmjs/amino" "^0.32.4"
     "@cosmjs/crypto" "^0.32.4"

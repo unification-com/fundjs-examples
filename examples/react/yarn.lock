@@ -3524,10 +3524,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@unification-com/fundjs-react@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@unification-com/fundjs-react/-/fundjs-react-0.0.7.tgz#5d3dd5972d0b46af638b201b3bc59ef6615a2e34"
-  integrity sha512-4LLSy+42oZr7wE12ZYfoHNCGFydVOm93Nj8ptrsakVz9PBMA8UWC9009piKqp1R1h2k6+4mvZovBhiuC/dcfKw==
+"@unification-com/fundjs-react@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@unification-com/fundjs-react/-/fundjs-react-0.1.0.tgz#a98964f0e39ca8b275c9a1b9a49a6df7ba96401a"
+  integrity sha512-wOVNsVs9DqxURmtgcylKZHwoacQjc9hRGiJwKx1pHwjnPOFrNFxipbdKpPdyBvgo3LHfQ4NCLXVlx82WfQvL/w==
   dependencies:
     "@cosmjs/amino" "^0.32.4"
     "@cosmjs/crypto" "^0.32.4"
