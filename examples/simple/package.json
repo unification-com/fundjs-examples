@@ -32,9 +32,10 @@
   "dependencies": {
     "@cosmjs/amino": "^0.32.4",
     "@cosmjs/crypto": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "^0.32.4",
-    "@unification-com/fundjs": "^0.0.9",
+    "@unification-com/fundjs": "^0.1.0",
     "chain-registry": "^1.63.87",
     "cosmjs-utils": "^0.1.0",
     "ws": "^8.18.0"
