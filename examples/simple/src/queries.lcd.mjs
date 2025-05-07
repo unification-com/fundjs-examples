@@ -15,8 +15,8 @@ createLCDClient({ restEndpoint: REST_ENDPOINT })
         return client
     }).then(async (client) => {
     // Query a wallet balance
-    console.log("- Get balance for und1hlmjew4k9mezd28chyyp8yzwjjkyupfep5zqlh")
-    const balances = await client.cosmos.bank.v1beta1.allBalances({ address: 'und1hlmjew4k9mezd28chyyp8yzwjjkyupfep5zqlh' });
+    console.log("- Get balance for und1eq239sgefyzm4crl85nfyvt7kw83vrna3f0eed")
+    const balances = await client.cosmos.bank.v1beta1.allBalances({ address: 'und1eq239sgefyzm4crl85nfyvt7kw83vrna3f0eed' });
     console.log(`  - Balance: ${balances.balances[0].amount} ${balances.balances[0].denom}`)
     return client
 }).then(async (client) => {
