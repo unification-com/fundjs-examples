@@ -102,8 +102,8 @@ tar -zxvf "und_${UND_VERS}_linux_x86_64.tar.gz"
 
 # init chain
 "${UND_BIN}" init devnet --home "${DATA_DIR}" --chain-id="${CHAIN_ID}"
-"${UND_BIN}" config chain-id "${CHAIN_ID}" --home "${DATA_DIR}"
-"${UND_BIN}" config keyring-backend test --home "${DATA_DIR}"
+"${UND_BIN}" config set client chain-id "${CHAIN_ID}" --home "${DATA_DIR}"
+"${UND_BIN}" config set client keyring-backend test --home "${DATA_DIR}"
 
 # change default denoms from stake to nund in genesis
 sed -i "s/stake/nund/g" "${DATA_DIR}/config/genesis.json"
@@ -118,6 +118,7 @@ ENT1=$(echo "${E_ADDR_RES}" | jq --raw-output '.address')
 
 sed -i "s/\"ent_signers\": \"und1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq5x8kpm\"/\"ent_signers\": \"$ENT1\"/g" "${DATA_DIR}/config/genesis.json"
 sed -i "s/\"voting_period\": \"172800s\"/\"voting_period\": \"30s\"/g" "${DATA_DIR}/config/genesis.json"
+sed -i "s/\"expedited_voting_period\": \"86400s\"/\"expedited_voting_period\": \"20s\"/g" "${DATA_DIR}/config/genesis.json"
 
 sed -i "s/minimum-gas-prices = \"\"/minimum-gas-prices = \"25.0nund\"/g" "${DATA_DIR}/config/app.toml"
 sed -i "s/enable = false/enable = true/g" "${DATA_DIR}/config/app.toml"
@@ -139,7 +140,7 @@ do
 done
 
 # validator gentx
-"${UND_BIN}" genesis gentx validator 1000000nund --home ${DATA_DIR} --chain-id="${CHAIN_ID}"
+"${UND_BIN}" genesis gentx validator 1000000nund --home ${DATA_DIR} --chain-id="${CHAIN_ID}" --keyring-backend test
 "${UND_BIN}" genesis collect-gentxs --home "${DATA_DIR}"
 
 # start the daemon
