@@ -104,9 +104,14 @@ getOfflineSignerAminoAccNum({
     return clients
 }).then(async clients => {
     console.log("- Get streams for und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx")
+    // fundjs@^0.2.0 (vaxildan Stage 5b) widened the stream key to
+    // (sender, receiver, denom). The `streamByReceiverSender` query
+    // now requires the `denom` to disambiguate which stream within
+    // that pair to fetch.
     const request = {
         receiverAddr: "und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h",
         senderAddr: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx",
+        denom: "nund",
     }
     const streamRes = await clients.queryClient.mainchain.stream.v1.streamByReceiverSender(request);
 

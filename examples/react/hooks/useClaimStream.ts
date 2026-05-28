@@ -30,9 +30,14 @@ export function useClaimStream(chainName: string) {
       return;
     }
 
+    // The `denom` field on stream Msgs is required from fundjs-react@^0.2.0
+    // (vaxildan Stage 5b — chain stores streams under the
+    // (sender, receiver, denom) triple). For Unification chains the base
+    // denom is `chainCoin.base` (typically `nund`).
     const msg = MessageComposer.withTypeUrl.claimStream({
       sender,
       receiver: address,
+      denom: chainCoin.base,
     });
 
     const fee: StdFee = {

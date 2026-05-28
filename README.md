@@ -3,7 +3,16 @@
 A few examples using `fundjs` and `fundjs-react`.
 
 The examples require a local DevNet to be running. This repo includes a script for quickly
-starting and running a DevNet
+starting and running a DevNet.
+
+## Compatibility
+
+| Examples branch | fundjs | fundjs-react | cosmjs | Mainchain |
+|---|---|---|---|---|
+| `dev` (current) | `^0.2.0` | `^0.2.0` | `^0.38.0` | `8-vaxildan` upgrade + later (SDK v0.54.3 / IBC-go v11 / CometBFT v0.39) |
+| `main` historical | `^0.1.0` | `^0.1.0` | `^0.32.4` | up to `7-taryon` (SDK v0.50 era) |
+
+The `^0.2.0` bump aligns with the vaxildan-era stream-key widening: `MsgClaimStream` / `MsgCancelStream` / `MsgUpdateFlowRate` and the `streamByReceiverSender` query all now require a `denom` field to disambiguate which stream within a `(sender, receiver)` pair to act on. Examples updated to pass `denom: 'nund'` (the Unification chain's base denom). The `devnet.sh` script auto-resolves the latest released `und` binary via the GitHub API — no hardcoded version change needed; once vaxildan releases, the DevNet picks it up automatically.
 
 ## DevNet
 
