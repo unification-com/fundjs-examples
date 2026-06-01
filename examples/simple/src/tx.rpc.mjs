@@ -1,5 +1,7 @@
-import { getSigningCosmosClient, mainchain, cosmos} from '@unification-com/fundjs';
-import { getOfflineSignerAmino} from 'cosmjs-utils';
+import { mainchain, cosmos } from '@unification-com/fundjs';
+import { SigningStargateClient } from "@cosmjs/stargate";
+import { getOfflineSignerAmino } from './signer.mjs';
+import { registry, aminoTypes } from './registry.mjs';
 
 import { MNEMONIC } from './defaults.mjs'
 
@@ -20,14 +22,17 @@ getOfflineSignerAmino({
     }
 }).then(async signer => {
     // create client with signer
-    // Note - each package has its own signing client. For Mainchain Msgs (BEACON etc.),
-    // the getSigningMainchainClient would be required as it contains the Mainchain Amino encoders.
-    // For Cosmos SDK Msgs, we use getSigningCosmosClient
-    // See custom.tx.rpc.mjs for single custom signer with all encoders (mainchain, cosmos & ibc)
-    const clientWithSigner = await getSigningCosmosClient({
-        rpcEndpoint: RPC_ENDPOINT,
-        signer // OfflineSigner - e.g. from private key, mnemonic, Keplr etc.
-    })
+    // fundjs@^0.2.0 (telescope 2.x) no longer ships the bundled
+    // `getSigningCosmosClient` / `getSigningMainchainClient` helpers.
+    // Compose a `SigningStargateClient` directly with the shared
+    // registry + aminoTypes from `./registry.mjs` instead — that
+    // single client supports the full Cosmos + IBC + Mainchain
+    // Msg surface, so the old single-vs-combined-client split is gone.
+    const clientWithSigner = await SigningStargateClient.connectWithSigner(
+        RPC_ENDPOINT,
+        signer,
+        { registry, aminoTypes }
+    )
 
     // create query client
     const queryClient = await createRPCQueryClient({rpcEndpoint: RPC_ENDPOINT})

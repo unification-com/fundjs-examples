@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chain-registry/types": "0.45.65",
+    "@chain-registry/types": "0.45.86",
     "@cosmjs/cosmwasm-stargate": "^0.38.0",
     "@cosmjs/stargate": "^0.38.0",
     "@cosmos-kit/react": "2.17.0",
@@ -36,6 +36,7 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@react-types/combobox": "^3.12.1",
     "@tanstack/react-query-devtools": "4.32.0",
     "@types/node": "^18.19.37",
     "@types/react": "^18.3.3",
@@ -43,5 +44,13 @@
     "eslint": "8.28.0",
     "eslint-config-next": "13.0.5",
     "typescript": "^5.1.6"
+  },
+  "resolutions": {
+    "@cosmjs/stargate": "^0.38.0",
+    "@cosmjs/proto-signing": "^0.38.0",
+    "@cosmjs/amino": "^0.38.0",
+    "@cosmjs/encoding": "^0.38.0",
+    "@cosmjs/crypto": "^0.38.0",
+    "@chain-registry/types": "0.45.86"
   }
 }

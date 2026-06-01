@@ -1,36 +1,13 @@
-import {mainchain, cosmos} from '@unification-com/fundjs';
-import { getOfflineSignerAminoAccNum} from './signer.mjs';
-import { Registry } from "@cosmjs/proto-signing";
-import { AminoTypes, SigningStargateClient } from "@cosmjs/stargate";
-import {
-    cosmosAminoConverters,
-    cosmosProtoRegistry,
-    ibcProtoRegistry,
-    ibcAminoConverters,
-    mainchainAminoConverters,
-    mainchainProtoRegistry
-} from '@unification-com/fundjs';
+import { mainchain, cosmos } from '@unification-com/fundjs';
+import { SigningStargateClient } from "@cosmjs/stargate";
+import { getOfflineSignerAminoAccNum } from './signer.mjs';
+import { registry, aminoTypes } from './registry.mjs';
 
 import { MNEMONIC } from './defaults.mjs'
 
 const RPC_ENDPOINT = "http://localhost:26657"
 
 const {createRPCQueryClient} = mainchain.ClientFactory;
-
-const protoRegistry = [
-    ...cosmosProtoRegistry,
-    ...ibcProtoRegistry,
-    ...mainchainProtoRegistry
-];
-
-const aminoConverters = {
-    ...cosmosAminoConverters,
-    ...ibcAminoConverters,
-    ...mainchainAminoConverters
-};
-
-const registry = new Registry(protoRegistry);
-const aminoTypes = new AminoTypes(aminoConverters);
 
 // An advanced tx with combined signer using RPC client
 
