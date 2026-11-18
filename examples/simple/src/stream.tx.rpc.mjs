@@ -1,36 +1,13 @@
-import {mainchain, cosmos} from '@unification-com/fundjs';
-import { getOfflineSignerAminoAccNum} from './signer.mjs';
-import { Registry } from "@cosmjs/proto-signing";
-import { AminoTypes, SigningStargateClient } from "@cosmjs/stargate";
-import {
-    cosmosAminoConverters,
-    cosmosProtoRegistry,
-    ibcProtoRegistry,
-    ibcAminoConverters,
-    mainchainAminoConverters,
-    mainchainProtoRegistry
-} from '@unification-com/fundjs';
+import { mainchain, cosmos } from '@unification-com/fundjs';
+import { SigningStargateClient } from "@cosmjs/stargate";
+import { getOfflineSignerAminoAccNum } from './signer.mjs';
+import { registry, aminoTypes } from './registry.mjs';
 
 import { MNEMONIC } from './defaults.mjs'
 
 const RPC_ENDPOINT = "http://localhost:26657"
 
 const {createRPCQueryClient} = mainchain.ClientFactory;
-
-const protoRegistry = [
-    ...cosmosProtoRegistry,
-    ...ibcProtoRegistry,
-    ...mainchainProtoRegistry
-];
-
-const aminoConverters = {
-    ...cosmosAminoConverters,
-    ...ibcAminoConverters,
-    ...mainchainAminoConverters
-};
-
-const registry = new Registry(protoRegistry);
-const aminoTypes = new AminoTypes(aminoConverters);
 
 // An advanced tx with combined signer using RPC client
 
@@ -104,9 +81,14 @@ getOfflineSignerAminoAccNum({
     return clients
 }).then(async clients => {
     console.log("- Get streams for und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx")
+    // fundjs@^0.2.0 (vaxildan Stage 5b) widened the stream key to
+    // (sender, receiver, denom). The `streamByReceiverSender` query
+    // now requires the `denom` to disambiguate which stream within
+    // that pair to fetch.
     const request = {
         receiverAddr: "und17tc3wwr8ksz5tzgl2t4wmpdmaxx0pn7vvz8j3h",
         senderAddr: "und1sc4wry4kwypu4ddj9nme70dw3ka6wyhv7sc3vx",
+        denom: "nund",
     }
     const streamRes = await clients.queryClient.mainchain.stream.v1.streamByReceiverSender(request);
 

@@ -31,9 +31,13 @@ export function useCancelSteam(chainName: string) {
       return;
     }
 
+    // `denom` field required from fundjs-react@^0.2.0 (vaxildan Stage 5b
+    // multi-denom stream key). For Unification chains this is the chain's
+    // base denom (typically `nund`).
     const msg = MessageComposer.withTypeUrl.cancelStream({
       receiver,
       sender: address,
+      denom: chainCoin.base,
     });
 
     const fee: StdFee = {

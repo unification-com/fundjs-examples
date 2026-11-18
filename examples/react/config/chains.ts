@@ -24,6 +24,9 @@ const unificationTestnet: Chain = baseChains.find(
 ) as Chain
 
 const unificationDevnet: Chain = {
+    // `chain_type` was added to @chain-registry/types ~0.45.86 (when
+    // cosmos-kit/react bumped). All Unification chains are Cosmos SDK.
+    chain_type: "cosmos",
     bech32_prefix: "und",
     chain_id: "FUND-DevNet",
     chain_name: "unificationdevnet",

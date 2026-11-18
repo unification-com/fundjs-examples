@@ -16,6 +16,18 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
 
     const { cosmos, isReady, isFetching } = useQueryHooks(chainName);
 
+    // fundjs-react@^0.2.0 / cosmos-sdk@^0.50 widened
+    // `GetTxsEventRequest`: `page`, `limit` (bigint) and `query` (string)
+    // are now required. The `events` filter is "deprecated" upstream but
+    // still wired on the gRPC side; we keep using it for the per-event-type
+    // queries below since composing a single `query` string would lose
+    // the per-type fan-out the consumer needs.
+    const requestExtras = {
+        page: 1n,
+        limit: 50n,
+        query: "",
+    } as const;
+
     function setQueryData(sen: string, rec: string) {
         if (rec !== "") {
             setReceiver(rec)
@@ -31,7 +43,8 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
                 `create_stream.sender='${sender}'`,
                 `create_stream.receiver='${receiver}'`
             ],
-            orderBy: OrderBy.ORDER_BY_ASC
+            orderBy: OrderBy.ORDER_BY_ASC,
+            ...requestExtras,
         },
         options: {
             enabled: isReady && sender !== "" && receiver !== "",
@@ -45,7 +58,8 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
                 `stream_deposit.sender='${sender}'`,
                 `stream_deposit.receiver='${receiver}'`
             ],
-            orderBy: OrderBy.ORDER_BY_ASC
+            orderBy: OrderBy.ORDER_BY_ASC,
+            ...requestExtras,
         },
         options: {
             enabled: isReady && sender !== "" && receiver !== "",
@@ -59,7 +73,8 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
                 `claim_stream.sender='${sender}'`,
                 `claim_stream.receiver='${receiver}'`
             ],
-            orderBy: OrderBy.ORDER_BY_ASC
+            orderBy: OrderBy.ORDER_BY_ASC,
+            ...requestExtras,
         },
         options: {
             enabled: isReady && sender !== "" && receiver !== "",
@@ -73,7 +88,8 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
                 `cancel_stream.sender='${sender}'`,
                 `cancel_stream.receiver='${receiver}'`
             ],
-            orderBy: OrderBy.ORDER_BY_ASC
+            orderBy: OrderBy.ORDER_BY_ASC,
+            ...requestExtras,
         },
         options: {
             enabled: isReady && sender !== "" && receiver !== "",
@@ -87,7 +103,8 @@ export function useQueryStreamTxs(chainName: string, s: string, r: string) {
                 `update_flow_rate.sender='${sender}'`,
                 `update_flow_rate.receiver='${receiver}'`
             ],
-            orderBy: OrderBy.ORDER_BY_ASC
+            orderBy: OrderBy.ORDER_BY_ASC,
+            ...requestExtras,
         },
         options: {
             enabled: isReady && sender !== "" && receiver !== "",

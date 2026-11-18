@@ -34,10 +34,14 @@ export function useUpdateFlowRate(chainName: string) {
   }: OnUpdateFlowRateOptions) {
     if (!address) return;
 
+    // `denom` field required from fundjs-react@^0.2.0 (vaxildan Stage 5b
+    // multi-denom stream key). For Unification chains this is the chain's
+    // base denom (typically `nund`).
     const msg = MessageComposer.withTypeUrl.updateFlowRate({
       receiver,
       sender: address,
       flowRate: BigInt(flowRate),
+      denom: chainCoin.base,
     });
 
     const fee: StdFee = {
